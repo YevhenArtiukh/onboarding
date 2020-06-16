@@ -1,0 +1,119 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Harmonogram roczny{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-md-5 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Harmonogram roczny</h3>
+            </div>
+            <div class="col-md-7 col-12 align-self-center d-none d-md-block">
+                <div class="d-flex justify-content-end">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{ app.request.get('year')??'now'|date('Y') }}
+                        </button>
+                        <div class="dropdown-menu" style="">
+                            {% for year in years %}
+                                <a class="dropdown-item {% if (app.request.get('year')??'now'|date('Y'))==year %}active{% endif %}" href="{{ path('annual_schedules', {year: year}) }}">{{ year }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% if is_granted('annual_schedules_action') %}
+                        <a href="{{ path('annual_schedule_add') }}" class="btn waves-effect waves-light btn-info ml-1">Dodaj onboarding</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="zero_config" class="table table-striped table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>LP.</th>
+                                        <th>Miesiąc</th>
+                                        <th>Część wspólna</th>
+                                        <th>Pharma</th>
+                                        <th>Onco</th>
+                                        <th>Sandoz</th>
+                                        {% if is_granted('annual_schedules_action') %}
+                                            <th>Akcje</th>
+                                        {% endif %}
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for annualSchedule in annualSchedules %}
+                                            <tr>
+                                                <td>{{ annualSchedule.id }}</td>
+                                                <td>{{ annualSchedule.month }}</td>
+                                                <td>{{ annualSchedule.dateStart|date('d.m.Y')~' - '~annualSchedule.dateEnd|date('d.m.Y') }}</td>
+                                                <td>{{ annualSchedule.pharma }}</td>
+                                                <td>{{ annualSchedule.onco }}</td>
+                                                <td>{{ annualSchedule.sandoz }}</td>
+                                                {% if is_granted('annual_schedules_action') %}
+                                                    <td>
+                                                        <button type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="ti-more-alt"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu" style="">
+                                                            <a class="dropdown-item" href="{{ path('annual_schedule_edit', {annualSchedule: annualSchedule.id}) }}">Edytuj</a>
+                                                            <a class="dropdown-item delete_annual_schedule" id="{{ annualSchedule.id }}" data-value="{{ csrf_token('delete' ~ annualSchedule.id) }}" href="#">Usuń</a>
+                                                        </div>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/custom-datatable.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/datatable-basic.init.js') }}"></script>
+    <script>
+        $('.delete_annual_schedule').on('click', function () {
+            $id = this.id;
+            $token = $(this).data("value");
+
+            Swal.fire({
+                title: "Usuwanie onboardingu z harmonogramu rocznego",
+                text: "Czy na pewno chcesz usunąć?",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Anuluj',
+                confirmButtonText: 'Usuń'
+            }).then((result) => {
+                if (result.value) {
+                    fetch(location.origin + "/annual-schedule/" + $id + "/delete", {
+                        method: 'delete',
+                        body: '_token=' + $token,
+                        headers: {'Content-type': 'application/x-www-form-urlencoded'}
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+            });
+            return false;
+        });
+    </script>
+{% endblock %}

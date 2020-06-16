@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Przypisane szkolenia{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Przypisane szkolenia</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-header bg-info text-white text-center">
+                            {{ app.request.get('user').name~' '~app.request.get('user').surname~' | '
+                            ~app.request.get('user').position~' | '~app.request.get('user').department.name }}
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12 col-lg-10 offset-lg-1">
+                                        {{ form_widget(form.checkAll) }}
+                                        {{ form_widget(form.uncheckAll) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    {% for onboardingTraining in form.onboardingTrainings %}
+                                        <div class="col-12 col-lg-10 offset-lg-1 mt-3">
+                                            {{ form_widget(onboardingTraining) }}
+                                            {{ form_label(onboardingTraining) }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <a class="btn btn-dark" href="{{ path('onboarding_show', {onboarding: app.request.get('onboarding').id}) }}">Anuluj</a>
+                                    <button type="submit" class="btn btn-info">Zapisz</button>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $('#edit_user_training_checkAll').click(function() {
+            $(":checkbox").each(function (index, value) {
+                if($(this).is(":not(:checked)"))
+                    $(this).click();
+            });
+        });
+        $('#edit_user_training_uncheckAll').click(function() {
+            $(":checkbox").each(function (index, value) {
+                if($(this).is(":checked"))
+                    $(this).click();
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Wyniki zaliczeń{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Historia odpowiedzi "{{ trainingName }}"</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive overflow-inherit">
+                                <table id="zero_config" class="table table-striped table-bordered">
+                                    <thead class="table">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Pytanie</th>
+                                        <th>Odpowiedź</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="table-striped ">
+                                    {% for uA in userAnswers %}
+                                        <tr>
+                                            <td>{{ uA.id }} </td>
+                                            <td>{{ uA.question }}</td>
+                                            <td class="text-{% if uA.correct %}success{% else %}danger{% endif %}" >{{ uA.answer}} </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/custom-datatable.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#zero_config').dataTable({
+                language: {
+                    emptyTable: "Brak wyników",
+                    infoEmpty: "Brak wyników",
+                    zeroRecords: "Brak wyników",
+                    lengthMenu: "_MENU_",
+                    search: "  ",
+                    sSearchPlaceholder: "Wyszukaj...",
+                    info: "Wyświetlanych jest _START_ do _END_ z _TOTAL_ wyników", sInfoFiltered:"(wyfiltrowane z _MAX_ wszystkich wpisów)",
+                    paginate: {
+                        "next": " >",
+                        "previous": "< "
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

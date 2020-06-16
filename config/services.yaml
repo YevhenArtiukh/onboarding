@@ -1,0 +1,536 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    mailer_from: 'admin@mystart.com.pl'
+    training_photo_dir: '%kernel.project_dir%/public/uploaded/training/'
+    training_attachment_dir: '%kernel.project_dir%/public/uploaded/trainingAttachment/'
+    user_photo_dir: '%kernel.project_dir%/public/uploaded/user/'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    voter:
+        class: App\Adapter\Core\Voter
+        tags:
+        - { name: security.voter }
+
+    doctrine_application_transaction:
+        class: App\Adapter\Core\Transaction
+        arguments: ["@doctrine.orm.entity_manager"]
+        public: true
+
+    App\Adapter\Core\EmailFactory:
+        arguments:
+            - '%mailer_from%'
+        public: true
+
+    email_factory:
+        alias: App\Adapter\Core\EmailFactory
+        public: true
+
+    Users:
+        class: App\Adapter\Users\Users
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Permissions:
+        class: App\Adapter\Permissions\Permissions
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Roles:
+        class: App\Adapter\Roles\Roles
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Divisions:
+        class: App\Adapter\Divisions\Divisions
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Departments:
+        class: App\Adapter\Departments\Departments
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Trainings:
+        class: App\Adapter\Trainings\Trainings
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Onboardings:
+        class: App\Adapter\Onboardings\Onboardings
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Emails:
+        class: App\Adapter\Emails\Emails
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Exams:
+        class: App\Adapter\Exams\Exams
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Questions:
+        class: App\Adapter\Questions\Questions
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Answers:
+        class: App\Adapter\Answers\Answers
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Places:
+        class: App\Adapter\Places\Places
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    OnboardingTrainings:
+        class: App\Adapter\OnboardingTrainings\OnboardingTrainings
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    OnboardingDivisions:
+        class: App\Adapter\OnboardingDivisions\OnboardingDivisions
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    TrainingAttachments:
+        class: App\Adapter\TrainingAttachments\TrainingAttachments
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    UserAnswers:
+        class: App\Adapter\UserAnswers\UserAnswers
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    UserResults:
+        class: App\Adapter\UserResults\UserResults
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    AnnualSchedules:
+        class: App\Adapter\AnnualSchedules\AnnualSchedules
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    UserAnswerQuestionnaires:
+        class: App\Adapter\UserAnswerQuestionnaires\UserAnswerQuestionnaires
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+
+
+    PresenceParticipants:
+        class: App\Adapter\PresenceParticipants\PresenceParticipants
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    RelUsersWidgets:
+        class: App\Adapter\RelUsersWidgets\RelUsersWidgets
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    Widgets:
+        class: App\Adapter\Widgets\Widgets
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    App\Entity\Users\UseCase\CreateUser:
+        arguments:
+            - "@Users"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\FirstLoginUser:
+        arguments:
+            - "@Users"
+            - "@Widgets"
+            - "@RelUsersWidgets"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\EditCurrentRole:
+        arguments:
+            - "@Roles"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\PasswordReset:
+        arguments:
+            - "@Users"
+            - "@Emails"
+            - "@emails.password_reset"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\PasswordResetChange:
+        arguments:
+            - "@Users"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Permissions\UseCase\CreatePermission:
+        arguments:
+            - "@Permissions"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Permissions\UseCase\EditPermission:
+        arguments:
+            - "@Permissions"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Roles\UseCase\CreateRole:
+        arguments:
+            - "@Roles"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Roles\UseCase\EditRole:
+        arguments:
+            - "@Roles"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Divisions\UseCase\CreateDivision:
+        arguments:
+            - "@Divisions"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Divisions\UseCase\EditDivision:
+        arguments:
+            - "@Divisions"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Departments\UseCase\CreateDepartment:
+        arguments:
+            - "@Departments"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Departments\UseCase\EditDepartment:
+        arguments:
+            - "@Departments"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Trainings\UseCase\CreateTraining:
+        arguments:
+            - "@Trainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Trainings\UseCase\EditTraining:
+        arguments:
+            - "@Trainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\CreateOnboarding:
+        arguments:
+            - "@Onboardings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\DeleteOnboarding:
+        arguments:
+            - "@Onboardings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\AddUserOnboarding:
+        arguments:
+            - "@Users"
+            - "@OnboardingTrainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\EditUserOnboarding:
+        arguments:
+            - "@Users"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\DeleteUserOnboarding:
+        arguments:
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\AddUsersOnboarding:
+        arguments:
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\ChangeStatusOnboarding:
+        arguments:
+            - "@OnboardingDivisions"
+            - "@Emails"
+            - "@emails.onboarding_general"
+            - "@emails.onboarding_division"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\EditUserTrainingOnboarding:
+        arguments:
+            - "@Users"
+            - "@OnboardingTrainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\CopyOnboarding:
+        arguments:
+            - "@Onboardings"
+            - "@OnboardingTrainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Onboardings\UseCase\SendEmailOnboarding:
+        arguments:
+            - "@Emails"
+            - "@emails.onboarding_coach"
+            - "@emails.onboarding_employee_manager"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Emails\UseCase\CreateEmail:
+        arguments:
+            - "@Emails"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Emails\UseCase\EditEmail:
+        arguments:
+            - "@Emails"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Exams\UseCase\CreateExam:
+        arguments:
+            - "@Exams"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Questions\UseCase\CreateQuestion:
+        arguments:
+            - "@Questions"
+            - "@Answers"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Questions\UseCase\EditQuestion:
+        arguments:
+            - "@Questions"
+            - "@Answers"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Places\UseCase\CreatePlace:
+        arguments:
+            - "@Places"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Places\UseCase\EditPlace:
+        arguments:
+            - "@Places"
+            - "@doctrine_application_transaction"
+
+    App\Entity\OnboardingTrainings\UseCase\CreateOnboardingTraining:
+        arguments:
+            - "@OnboardingTrainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\OnboardingTrainings\UseCase\CreateOnboardingTrainingAdditional:
+        arguments:
+            - "@OnboardingTrainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\OnboardingTrainings\UseCase\EditOnboardingTraining:
+        arguments:
+            - "@OnboardingTrainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\OnboardingTrainings\UseCase\EditOnboardingTrainingAdditional:
+        arguments:
+            - "@OnboardingTrainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\OnboardingTrainings\UseCase\DeleteOnboardingTraining:
+        arguments:
+            - "@OnboardingTrainings"
+            - "@doctrine_application_transaction"
+
+    App\Entity\OnboardingDivisions\UseCase\CreateOnboardingDivision:
+        arguments:
+            - "@OnboardingDivisions"
+            - "@doctrine_application_transaction"
+
+    App\Entity\TrainingAttachments\UseCase\AddTrainingAttachment:
+        arguments:
+            - "@TrainingAttachments"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Exams\UseCase\DeleteExam:
+        arguments:
+            - "@Exams"
+            - "@doctrine_application_transaction"
+
+    App\Entity\TrainingAttachments\UseCase\DeleteTrainingAttachment:
+        arguments:
+            - "@TrainingAttachments"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Questions\UseCase\ChangeSortQuestion:
+        arguments:
+            - "@Questions"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Questions\UseCase\DeleteQuestion:
+        arguments:
+            - "@Questions"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\EditUser:
+        arguments:
+            - "@Users"
+            - "@doctrine_application_transaction"
+
+    App\Entity\UserResults\UseCase\CreateUserResult:
+        arguments:
+            - "@UserResults"
+            - "@UserAnswers"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Exams\UseCase\EditExam:
+        arguments:
+            - "@Exams"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\ChangePhotoUser:
+        arguments:
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\BlockUser:
+        arguments:
+            - "@Users"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\AnonymizationUser:
+        arguments:
+            - "@Users"
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\ChangePassword:
+        arguments:
+            - "@doctrine_application_transaction"
+
+    App\Entity\Users\UseCase\MigrateUser:
+        arguments:
+            - "@Users"
+            - "@doctrine_application_transaction"
+
+    App\Entity\AnnualSchedules\UseCase\CreateAnnualSchedule:
+        arguments:
+            - "@AnnualSchedules"
+            - "@doctrine_application_transaction"
+
+    App\Entity\AnnualSchedules\UseCase\EditAnnualSchedule:
+        arguments:
+            - "@AnnualSchedules"
+            - "@doctrine_application_transaction"
+
+    App\Entity\AnnualSchedules\UseCase\DeleteAnnualSchedule:
+        arguments:
+            - "@AnnualSchedules"
+            - "@doctrine_application_transaction"
+
+    App\Entity\PresenceParticipants\UseCase\UserConfirmation:
+        arguments:
+            - "@PresenceParticipants"
+            - "@UserResults"
+            - "@doctrine_application_transaction"
+
+    App\Entity\PresenceParticipants\UseCase\CoachConfirmation:
+        arguments:
+            - "@PresenceParticipants"
+            - "@Users"
+            - "@UserResults"
+            - "@doctrine_application_transaction"
+
+    App\Adapter\Users\Users:
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+
+    App\Adapter\UserAnswerQuestionnaires\UserAnswerQuestionnaires:
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+
+    emails.password_reset:
+        class: App\Entity\Users\UseCase\PasswordReset\GenerateEmail
+        public: true
+
+    emails.onboarding_general:
+        class: App\Entity\Onboardings\UseCase\ChangeStatusOnboarding\GenerateEmailGeneral
+        public: true
+
+    emails.onboarding_division:
+        class: App\Entity\Onboardings\UseCase\ChangeStatusOnboarding\GenerateEmailDivision
+        public: true
+
+    emails.onboarding_coach:
+        class: App\Entity\Onboardings\UseCase\SendEmailOnboarding\GenerateEmailCoach
+        public: true
+
+    emails.onboarding_employee_manager:
+        class: App\Entity\Onboardings\UseCase\SendEmailOnboarding\GenerateEmailEmployeeManager
+        public: true
+
+    App\Adapter\Onboardings\Onboardings:
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+
+    App\Adapter\Widgets\Widgets:
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+
+    App\Adapter\RelUsersWidgets\RelUsersWidgets:
+        arguments:
+            - "@doctrine.orm.default_entity_manager"
+        public: true
+
+    App\Entity\UserResults\UseCase\CreateUserResultQuestionnaire:
+        arguments:
+            - "@UserResults"
+            - "@UserAnswerQuestionnaires"
+            - "@doctrine_application_transaction"
+
+    App\Entity\RelUsersWidgets\UseCase\RemoveWidget:
+        arguments:
+            - "@RelUsersWidgets"
+            - "@doctrine_application_transaction"
+
+    App\Entity\RelUsersWidgets\UseCase\AddUserWidget:
+        arguments:
+            - "@RelUsersWidgets"
+            - "@doctrine_application_transaction"
+

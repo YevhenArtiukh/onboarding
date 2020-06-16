@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edycja testu/szkolenia{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Edycja testu/szkolenia</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="offset-3 col-6">
+
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        {{ form_row(form.name) }}
+                                    </div>
+                                    <div class="col-6">
+                                        {{ form_row(form.type) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        {{ form_row(form.status) }}
+                                    </div>
+                                    <div class="col-6">
+                                        {{ form_row(form.duration) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <a class="btn btn-dark" href="{{ path('trainings') }}">Anuluj</a>
+                                    <button type="submit" id="submitFormEdit" class="btn btn-info">Zapisz</button>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+
+    </script>
+{% endblock %}

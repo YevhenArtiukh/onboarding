@@ -1,0 +1,249 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Twój profil{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Twój profil</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-4 col-xlg-3 col-md-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <center class="mt-4">
+                                {% if user.photo %}
+                                    <img class="rounded-circle" width="150" id="photo"
+                                            src="{{ asset('uploaded/user/'~user.photo) }}"
+                                             onclick="clickInputFile()">
+                                {% else %}
+                                    <img  src="{{ asset('assets/images/backphoto.png') }}" id="photo"
+                                          class="rounded-circle" width="150"
+                                          alt="photo" onclick="clickInputFile()">
+                                {% endif %}
+
+
+                                <h4 class="card-title mt-2">{{ user.name~' '~user.surname }}</h4>
+                                <h6 class="card-subtitle">{{ user.position }}</h6>
+                            </center>
+                        </div>
+                        <div>
+                            <hr>
+                        </div>
+                        <div class="card-body">
+
+                            <small class="text-muted pt-4 db">Imię</small>
+                            <h6>{{ user.name }}</h6>
+                            <small class="text-muted pt-4 db">Nazwisko</small>
+                            <h6>{{ user.surname }}</h6>
+                            <small class="text-muted pt-4 db">Login</small>
+                            <h6>{{ user.login }}</h6>
+                            <small class="text-muted">Email</small>
+                            <h6>{{ user.email }}</h6>
+                            <br/>
+                        </div>
+                    </div>
+                </div>
+                <!-- Column -->
+                <!-- Column -->
+                <div class="col-lg-8 col-xlg-9 col-md-7">
+                    <div class="card">
+                        <!-- Tabs -->
+                        <form class="form-horizontal">
+                            <div class="form-body">
+                                <div class="card-body">
+                                    <h4 class="card-title">Dane ogólne</h4>
+                                </div>
+                                <hr class="mt-0 mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Data zatrudnienia:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.dateOfEmployment|date("d.m.Y") }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Data onboardingu:</label>
+                                                <div class="col-md-7">
+                                                        <p class="form-control-static"> {{ user.onboardingDate }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <!--/row-->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Obszar:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.department.name }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Stanowisko:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.position }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <!--/row-->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Dywizja:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.department.division.name }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Forma zatrudnienia:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.formOfEmployment }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Pracownik:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.typeOfWorker }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Rola:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {% for role in user.roles %} {{ role}}{% if not loop.last %}, {% endif%} {% endfor %} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <!--/row-->
+
+                                    <h4 class="card-title mt-2" >Dane przełożonego</h4>
+                                </div>
+                                <hr class="mt-0 mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Imię przełożonego:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.departmentManagerName}} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Nazwisko przełożonego:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.departmentManagerSurname}} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <!--/row-->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Email przełożonego:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static">{{ user.departmentManagerEmail}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        {{ form_start(form) }}
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+                <!-- Column -->
+            </div>
+            <!-- Row -->
+            <!-- ============================================================== -->
+            <!-- End PAge Content -->
+            <!-- ============================================================== -->
+            <!-- ============================================================== -->
+            <!-- Right sidebar -->
+            <!-- ============================================================== -->
+            <!-- .right-sidebar -->
+            <!-- ============================================================== -->
+            <!-- End Right sidebar -->
+            <!-- ============================================================== -->
+        </div>
+        <!-- ============================================================== -->
+        <!-- End Container fluid  -->
+        <!-- ============================================================== -->
+        <!-- ============================================================== -->
+        <!-- footer -->
+        <!-- ============================================================== -->
+        <footer class="footer">
+            © 2020 Material Pro Admin by wrappixel.com
+        </footer>
+        <!-- ============================================================== -->
+        <!-- End footer -->
+        <!-- ============================================================== -->
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script href="https://connect.facebook.net/en_US/fbevents.js"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+    <script>
+        function clickInputFile() {
+            document.getElementById("change_photo_photo").click();
+        }
+
+        function handleFileSelect(evt) {
+            var files = evt.target.files;
+            for (var i = 0, f; f = files[i]; i++) {
+                if (!f.type.match('image.*')) {
+                    continue;
+                }
+                var reader = new FileReader();
+                reader.onload = (function(theFile) {
+                    return function(e) {
+                        document.getElementById('photo').src = e.target.result;
+                    };
+                })(f);
+                reader.readAsDataURL(f);
+
+                $('form[name="change_photo"]').submit();
+            }
+        }
+
+        document.getElementById('change_photo_photo').addEventListener('change', handleFileSelect, false);
+
+    </script>
+{% endblock %}

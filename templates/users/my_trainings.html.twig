@@ -1,0 +1,221 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Moje szkolenia{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/extra-libs/as-pie-progress/asPieProgress.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% set countTest = 0 %}
+    {% set countNotAdditional = 0 %}
+    {% set countNotAdditionalSuccess = 0 %}
+    {% set countIsAdditional = 0 %}
+    {% set countIsAdditionalSuccess = 0 %}
+
+    {% for userOnboardingTraining in userOnboardingTrainings %}
+        {% if userOnboardingTraining.isTrainingIsAdditional %}
+            {% set countIsAdditional = countIsAdditional + 1 %}
+            {% if userOnboardingTraining.score == 100 %}
+                {% set countIsAdditionalSuccess = countIsAdditionalSuccess + 1 %}
+            {% endif %}
+        {% else %}
+            {% set countNotAdditional = countNotAdditional + 1 %}
+            {% if userOnboardingTraining.score == 100 %}
+                {% set countNotAdditionalSuccess = countNotAdditionalSuccess + 1 %}
+            {% endif %}
+            {% if userOnboardingTraining.isTest %}
+                {% set countTest = countTest + 1 %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Moje szkolenia</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-lg-6">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        {% set valueNow = (countNotAdditional == 0)?100:((countNotAdditionalSuccess*100)/countNotAdditional)|number_format %}
+                                        <div class="pie_progress" role="progressbar" data-barcolor="#26c6da" aria-valuenow="{{ valueNow }}" data-barsize="20" aria-valuemin="0" aria-valuemax="100">
+                                            <h4 class="pie_progress__content text-muted">{{ valueNow }}%</h4>
+                                        </div>
+                                        <div class="mt-3">
+                                            <h4>
+                                                Postęp szkoleń onboardingu
+                                            </h4>
+                                            <p class="text-muted">
+                                                {{ countNotAdditional }} szkoleń, {{ countTest }} testów
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        {% set valueNow = (countIsAdditional == 0)?100:((countIsAdditionalSuccess*100)/countIsAdditional)|number_format %}
+                                        <div class="pie_progress" role="progressbar" data-barcolor="#26c6da" aria-valuenow="{{ valueNow }}" data-barsize="20" aria-valuemin="0" aria-valuemax="100">
+                                            <h4 class="pie_progress__content text-muted">{{ valueNow }}%</h4>
+                                        </div>
+                                        <div class="mt-3">
+                                            <h4>
+                                                Postęp szkoleń dodatkowych
+                                            </h4>
+                                            <p class="text-muted">
+                                                {{ countIsAdditional }} szkoleń
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-header bg-info text-white text-center">
+                            Szkolenia do realizacji
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Nazwa szkolenia</th>
+                                        <th>Termin zaliczenia</th>
+                                        <th>Trenerzy</th>
+                                        <th>Wynik</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for userOnboardingTraining in userOnboardingTrainings %}
+                                        {% if userOnboardingTraining.score != 100 %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ path('onboarding_training_show', {onboardingTraining: userOnboardingTraining.onboardingTrainingId }) }}">
+                                                        {{ userOnboardingTraining.trainingName }}
+                                                        {% if userOnboardingTraining.isTrainingIsAdditional %}
+                                                            | dodatkowe
+                                                        {% endif %}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    {{ userOnboardingTraining.deadline|date('d.m.Y') }}
+                                                </td>
+                                                <td>
+                                                    {{ userOnboardingTraining.coaches }}
+                                                </td>
+                                                <td>
+                                                    {{ userOnboardingTraining.score }}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-header bg-info text-white text-center">
+                            Szkolenia zrealizowane
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Nazwa szkolenia</th>
+                                        <th>Termin zaliczenia</th>
+                                        <th>Trenerzy</th>
+                                        <th>Wynik</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for userOnboardingTraining in userOnboardingTrainings %}
+                                        {% if userOnboardingTraining.score == 100 %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ path('onboarding_training_show', {onboardingTraining: userOnboardingTraining.onboardingTrainingId }) }}">
+                                                        {{ userOnboardingTraining.trainingName }}
+                                                        {% if userOnboardingTraining.isTrainingIsAdditional %}
+                                                            | dodatkowe
+                                                        {% endif %}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    {{ userOnboardingTraining.deadline|date('d.m.Y') }}
+                                                </td>
+                                                <td>
+                                                    {{ userOnboardingTraining.coaches }}
+                                                </td>
+                                                <td>
+                                                    {{ userOnboardingTraining.score }}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/extra-libs/as-pie-progress/jquery-asPieProgress.min.js') }}"></script>
+    <script>
+        jQuery(function($) {
+            $('.pie_progress').asPieProgress({
+                namespace: 'pie_progress'
+            });
+            // Example with grater loading time - loads longer
+            $('.pie_progress--slow').asPieProgress({
+                namespace: 'pie_progress',
+                goal: 1000,
+                min: 0,
+                max: 1000,
+                speed: 200,
+                easing: 'linear'
+            });
+            // Example with grater loading time - loads longer
+            $('.pie_progress--countdown').asPieProgress({
+                namespace: 'pie_progress',
+                easing: 'linear',
+                first: 120,
+                max: 120,
+                goal: 0,
+                speed: 1200, // 120 s * 1000 ms per s / 100
+                numberCallback: function(n) {
+                    var minutes = Math.floor(this.now / 60);
+                    var seconds = this.now % 60;
+                    if (seconds < 10) {
+                        seconds = '0' + seconds;
+                    }
+                    return minutes + ': ' + seconds;
+                }
+            });
+        });
+    </script>
+{% endblock %}

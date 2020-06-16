@@ -1,0 +1,146 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Export danych osób{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+    {% if users %}
+        <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Export danych osób</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-header bg-info text-white text-center">
+                            Export danych osób
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(formDateBetween) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12 col-md-4">
+                                        {{ form_row(formDateBetween.dateStart) }}
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        {{ form_row(formDateBetween.dateEnd) }}
+                                    </div>
+                                    <div class="col-12 col-md-4 text-right text-md-center">
+                                        <button type="submit" class="btn btn-info">Pobierz raport</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {{ form_end(formDateBetween) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-header bg-info text-white text-center">
+                            Export danych pracownika
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(formUserSearch) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form_row(formUserSearch.name) }}
+                                    </div>
+                                    <div class="col-12">
+                                        {{ form_row(formUserSearch.surname) }}
+                                    </div>
+                                    <div class="col-12">
+                                        {{ form_row(formUserSearch.department) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <button type="submit" class="btn btn-info">Wyszukaj</button>
+                                </div>
+                            </div>
+                            {{ form_end(formUserSearch) }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if users %}
+                    <div class="col-12 col-lg-8 offset-lg-2">
+                        <div class="card">
+                            <div class="card-header bg-info text-white text-center">
+                                Pobierz raport dla pracownika
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="zero_config" class="table table-striped table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th>Imię i nazwisko</th>
+                                            <th>Login</th>
+                                            <th>Obszar</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for user in users %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ path('report_export_data_user', {user: user.id}) }}">{{ user.fullname }}</a>
+                                                </td>
+                                                <td>{{ user.login }}</td>
+                                                <td>{{ user.department }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+    {% if users %}
+        <script src="{{ asset('assets/libs/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ asset('assets/js/pages/datatable/custom-datatable.js') }}"></script>
+    {% endif %}
+    <script>
+        $(".select2").select2({
+            dropdownAutoWidth : true,
+            width: '100%'
+        });
+        {% if users %}
+            $('#zero_config').DataTable({
+                language: {
+                    emptyTable: "Brak wyników",
+                    infoEmpty: "Brak wyników",
+                    zeroRecords: "Brak wyników",
+                    lengthMenu: "_MENU_",
+                    search: "  ",
+                    sSearchPlaceholder: "Wyszukaj...",
+                    info: "Wyświetlanych jest _START_ do _END_ z _TOTAL_ wyników", sInfoFiltered:"(wyfiltrowane z _MAX_ wszystkich wpisów)",
+                    paginate: {
+                        "next": " >",
+                        "previous": "< "
+                    }
+                }
+            });
+        {% endif %}
+    </script>
+{% endblock %}

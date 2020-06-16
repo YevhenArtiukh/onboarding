@@ -1,0 +1,205 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}{{ app.request.get('exam').training.name }}{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">{{ app.request.get('exam').training.name }}</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+
+            <div class="row exam-info">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card text-center">
+                        <div class="card-header bg-info">
+                            <h1 class="text-white">
+                                {{ app.request.get('exam').name }}
+                            </h1>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                <p>Egzamin składa się z <b>{{ app.request.get('exam').questions|length }}</b> pytań.</p>
+                                <p>Na wypełnienie całego testu masz <b>{{ app.request.get('exam').duration }}</b> minut</p>
+                                <p>Aby zakończyć egzamin pozytywnym wynikiem należy uzyskać minimum <b>100%</b>.</p>
+                                <p>Powodzenia!</p>
+                            </div>
+                            {% if app.request.get('exam').questions|length != 0 %}
+                                <button class="btn btn-success" onclick="startExam()">Rozpocznij test</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row exam-write">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="questions-list mb-3 mb-md-0">
+                                <div class="nav nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                    {% for question in app.request.get('exam').questions %}
+                                        <a class="nav-link {% if loop.first %}active show{% endif %}" id="v-pills-{{ loop.index }}-tab" data-toggle="pill" href="#v-pills-{{ loop.index }}" role="tab" aria-controls="v-pills-home" aria-selected="{% if loop.first %}true{% else %}false{% endif %}" onclick="moveStep({{ loop.index }})">
+                                            <span>{{ loop.index }}</span>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="progress progress-lg mb-2">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p class="progress-time text-right">
+                                {{ date(app.request.get('exam').duration*60)|date('i:s') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-sm-none col-12 d-flex justify-content-between align-items-center mb-3">
+                    <button class="btn btn-twitter waves-effect waves-light btn__previous-question" type="button" onclick="changeStep(-1);" disabled>
+                        Poprzednie pytanie
+                    </button>
+                    <button class="btn btn-twitter waves-effect waves-light btn__next-question" type="button" onclick="changeStep(1);">
+                        Następne pytanie
+                    </button>
+                </div>
+                <div class="col-md-9">
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="exam" action="{{ path('exam_write', {onboardingTraining: app.request.get('onboardingTraining').id, exam: app.request.get('exam').id}) }}" method="post">
+                                <div class="question">
+                                    <div class="tab-content" id="v-pills-tabContent">
+                                        {% for key, question in app.request.get('exam').questions %}
+                                            <div class="tab-pane fade {% if loop.first %}active show{% endif %}" id="v-pills-{{ loop.index }}" role="tabpanel" aria-labelledby="v-pills-{{ loop.index }}-tab">
+                                                <h4 class="mb-3">{{ question.name }}</h4>
+                                                {% for answer in question.answers %}
+                                                    <div class="py-2 pl-3">
+                                                        <input type="checkbox" id="answers_{{ answer.id }}" name="answers[{{ question.id }}][{{ answer.id }}]" class="material-inputs filled-in chk-col-light-blue">
+                                                        <label for="answers_{{ answer.id }}">{{ answer.name }}</label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="d-none d-sm-flex flex-column flex-sm-row justify-content-between align-items-center mt-3">
+                                    <div class="exam-btn-group__group text-center">
+                                        <button class="btn btn-twitter waves-effect waves-light btn__previous-question mb-2" type="button" onclick="changeStep(-1);" disabled>
+                                            Poprzednie pytanie
+                                        </button>
+                                        <button class="btn btn-twitter waves-effect waves-light btn__next-question mb-2" type="button" onclick="changeStep(1);">
+                                            Następne pytanie
+                                        </button>
+                                    </div>
+                                    <div class="btn-wrapp">
+                                        <button class="btn btn-success btn__exam-finish mb-2" type="submit">Zakończ test</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-sm-none col-12 text-right">
+                    <button class="btn btn-success btn__exam-finish mb-2" type="submit" onclick="$('#exam').submit()">Zakończ test</button>
+                </div>
+            </div>
+
+            <div class="row exam-result">
+            {#<div class="row">#}
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div id="result-card-status" class="card text-center">
+                        <div class="card-header">
+                            {#<i id="result-card-icon" class="icon-check2/icon-warning"></i>#}
+                        </div>
+                        <div class="card-body collapse in">
+                            <div class="card-block">
+                                <div class="card-text">
+                                    <h5>{{ app.request.get('exam').training.name }}</h5>
+                                    <p class="exam-result__text"></p>
+                                    <p>Twój wynik to: <b class="exam-result__score"></b></p>
+                                </div>
+                                <a href="#" class="btn exam-result__href"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        let $duration = {{ app.request.get('exam').duration*60 }};
+        let $interval;
+        let $step = 1;
+
+        function startExam() {
+            $('.exam-info').hide();
+            $('.exam-write').css('display', 'flex');
+
+            $interval = setInterval(function () {
+                $duration -= 1;
+                let progress = ($duration/{{ app.request.get('exam').duration*60 }})*100;
+                if($duration === 0) $('#exam').submit();
+                $('.progress-time').html(formatSeconds($duration));
+                $('.progress-bar').width(progress+'%').attr('aria-valuenow', progress);
+            }, 1000)
+        }
+
+        function formatSeconds(sec) {
+            return [(sec / 3600), ((sec % 3600) / 60), ((sec % 3600) % 60)]
+                .map(v => v < 10 ? "0" + parseInt(v) : parseInt(v))
+                .filter((i, j) => i !== "00" || j > 0)
+                .join(":");
+        }
+
+        function changeStep(a) {
+            $step = $step+a;
+            $('#v-pills-'+$step+'-tab').click();
+            $('.btn__previous-question').attr('disabled',$step===1?'disabled':false);
+            $('.btn__next-question').attr('disabled',$step==={{ app.request.get('exam').questions|length }}?'disabled':false);
+        }
+
+        function moveStep(a) {
+            $step = a;
+            $('.btn__previous-question').attr('disabled',$step===1?'disabled':false);
+            $('.btn__next-question').attr('disabled',$step==={{ app.request.get('exam').questions|length }}?'disabled':false);
+        }
+
+        $('#exam').on('submit', function (e) {
+            e.preventDefault();
+            clearInterval($interval);
+            $.ajax({
+                method: "POST",
+                url: "{{ app.request.getSchemeAndHttpHost() }}"+$(this).attr('action'),
+                data: {
+                    formData: $('#exam').serialize()
+                },
+                success: function (data) {
+                    let $score = data.score;
+                    let $count = data.count;
+                    let $correctCount = data.correctCount;
+                    $('.exam-result__score').text($count+'/'+$correctCount+' ('+$score+'%)');
+                    $('.exam-result .card-header').addClass($score===100?"bg-success":"bg-danger");
+                    $('.exam-result__text').text($score===100?"Brawo! Test zakończony sukcesem.":"Niestety test zakończył się niepowodzeniem.");
+                    $('.exam-result__href').attr('href', $score===100?
+                        "{{ path('onboarding_training_show', {onboardingTraining: app.request.get('onboardingTraining').id}) }}":
+                        "{{ path('exam_write', {onboardingTraining: app.request.get('onboardingTraining').id, exam: app.request.get('exam').id}) }}")
+                        .text($score===100?"Na stronę szkolenia":"Powrót do testu")
+                        .addClass($score===100?"btn-success":"btn-danger");
+                    $('.exam-write').hide();
+                    $('.exam-result').show();
+                },
+                error: function () {
+                    console.log('error');
+                }
+            })
+        })
+    </script>
+{% endblock %}

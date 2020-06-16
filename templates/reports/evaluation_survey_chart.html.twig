@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Wyniki ankiet ewaluacyjnych{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/libs/c3/c3.min.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Wyniki ankiet ewaluacyjnych</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12 col-md-3">
+                                        {{ form_row(form.date) }}
+                                    </div>
+                                    <div class="col-12 col-md-9">
+                                        {{ form_row(form.question) }}
+                                    </div>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                            <div id="visitor" style="height:290px; width:100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/c3/c3.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/d3/dist/d3.min.js') }}"></script>
+    <script>
+        let $onboarding = $('#evaluation_survey_chart_date');
+
+        $onboarding.change(function () {
+            let $form = $(this).closest('form');
+            let data = {};
+            data[$onboarding.attr('name')] = $onboarding.val();
+            $.ajax({
+                url: $form.attr('action'),
+                type: $form.attr('method'),
+                data: data,
+                success: function (html) {
+                    $('#evaluation_survey_chart_question').replaceWith(
+                        $(html).find('#evaluation_survey_chart_question')
+                    );
+                }
+            });
+        });
+
+        function questionChange() {
+            if ($onboarding.val() && $('#evaluation_survey_chart_question').val()) {
+                $.ajax({
+                    url: '{{ path('report_evaluation_survey_chart') }}',
+                    type: 'POST',
+                    data: {
+                        'onboarding': $onboarding.val(),
+                        'question': $('#evaluation_survey_chart_question').val()
+                    },
+                    success: function (response) {
+                        createChart(response);
+                    },
+                    error: function (err) {
+                        alert('error!');
+                    },
+                });
+            }
+        }
+
+        function createChart(response) {
+            let $colorsChoice = [
+                "#21C1D6",
+                "#1E88E5",
+                "#FB8C00",
+                "#FC4B6C",
+                "#F62D51"
+            ];
+
+            let $colorsYesno = [
+                "#1E88E5",
+                "#FB8C00"
+            ];
+
+            let $columns = [];
+            let $colors = [];
+            $.each(response, function (key, value) {
+                $columns.push([key, value]);
+            });
+
+            switch ($columns.length) {
+                case 2:
+                    $colors = $colorsYesno;
+                    break;
+                case 5:
+                    $colors = $colorsChoice;
+            }
+
+            let $chart = c3.generate({
+                bindto: '#visitor',
+                data: {
+                    columns: $columns,
+                    type: 'donut',
+                },
+                donut: {
+                    label: {
+                        show: false
+                    },
+                    width: 30,
+                },
+                legend: {
+                    // hide: true
+                },
+                color: {
+                    pattern: $colors
+                }
+            });
+        }
+    </script>
+{% endblock %}

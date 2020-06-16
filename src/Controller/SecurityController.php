@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Controller;
+
+use App\Adapter\Dashboard\DashboardQuery;
+use App\Adapter\Dashboard\DashboardQueryByRole\CoachQuery;
+use App\Adapter\Dashboard\DashboardQueryByRole\CrossPartnerQuery;
+use App\Adapter\Dashboard\DashboardQueryByRole\DivisionPartnerQuery;
+use App\Adapter\RelUsersWidgets\RelUsersWidgets;
+use App\Entity\RelUsersWidgets\RelUserWidget;
+use App\Entity\RelUsersWidgets\UseCase\AddUserWidget;
+use App\Entity\Users\User;
+use App\Entity\Widgets\Widget;
+use App\Form\Dashboard\AddSmallChart;
+use App\Form\Dashboard\AddWidgetType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+
+class SecurityController extends AbstractController
+{
+    /**
+     * @Route("/login", name="login")
+     * @param AuthenticationUtils $authenticationUtils
+     * @return Response
+     */
+    public function login(AuthenticationUtils $authenticationUtils): Response
+    {
+         if ($this->getUser()) {
+             return $this->redirectToRoute('dashboard');
+         }
+
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('security/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error
+        ]);
+    }
+
+    /**
+     * @Route("/logout", name="logout")
+     */
+    public function logout()
+    {
+        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+    }
+}

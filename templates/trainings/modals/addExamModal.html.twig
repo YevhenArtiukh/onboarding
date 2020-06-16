@@ -1,0 +1,40 @@
+<div class="modal fade" id="addExamModal" tabindex="-1" role="dialog"
+     aria-labelledby="addExamModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myLargeModalLabel">Nowy test/ankieta</h4>
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                {{ form_start(formExam) }}
+                <div class="form-body">
+                    <div class="row">
+                        <div class="col-6">
+                            {{ form_row(formExam.name) }}
+                        </div>
+                        <div class="col-6">
+                            {{ form_row(formExam.type) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            {{ form_row(formExam.status) }}
+                        </div>
+                        <div class="col-6">
+                            {{ form_row(formExam.duration) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-info">Zapisz</button>
+                        <a class="btn btn-dark" data-dismiss="modal" href="#">Anuluj</a>
+                    </div>
+                </div>
+                {{ form_end(formExam) }}
+            </div>
+        </div>
+    </div>
+</div>

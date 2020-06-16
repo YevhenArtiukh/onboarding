@@ -1,0 +1,210 @@
+<aside class="left-sidebar">
+    <!-- Sidebar scroll-->
+    <div class="scroll-sidebar">
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav">
+            <ul id="sidebarnav">
+                {% if is_granted('dashboard_page') %}
+                <li class="sidebar-item">
+                    <a href="{{ path('dashboard') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                        <i class="fas fa-home"></i>
+                        <span class="hide-menu">Strona główna</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="sidebar-item">
+                    <a href="{{ path('my_trainings') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span class="hide-menu">Moje szkolenia</span>
+                    </a>
+                </li>
+                {% if is_granted('training_schedule_general') %}
+                    <li class="sidebar-item">
+                        <a href="{{ path('training_schedule_general') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                            <i class="fas fa-calendar"></i>
+                            <span class="hide-menu">Plan szkoleń</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if is_granted('training_schedule_employee') %}
+                    <li class="sidebar-item">
+                        <a href="{{ path('training_schedule_employee') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                            <i class="fas fa-calendar"></i>
+                            <span class="hide-menu">Plan szkoleń</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if is_granted('coach_onboarding_trainings') %}
+                    <li class="sidebar-item">
+                        <a href="{{ path('coach_onboarding_trainings') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span class="hide-menu">Trener</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if is_granted('users') %}
+                    <li class="sidebar-item">
+                        <a href="{{ path('users') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                            <i class="fas fa-users"></i>
+                            <span class="hide-menu">Konta użytkowników</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if is_granted('departments') %}
+                    <li class="sidebar-item">
+                        <a href="{{ path('departments', {division:app.user.department.division.id}) }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                            <i class="fas fa-list"></i>
+                            <span class="hide-menu">Struktura</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if is_granted('annual_schedules_list') %}
+                    <li class="sidebar-item">
+                        <a href="{{ path('annual_schedules') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                            <i class="mdi mdi-calendar"></i>
+                            <span class="hide-menu">Harmonogram roc</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if is_granted('onboarding') or is_granted('training_general') %}
+                    <li class="sidebar-item">
+                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)"
+                           aria-expanded="false">
+                            <i class="fas fa-calendar-check"></i>
+                            <span class="hide-menu">Planowanie</span>
+                        </a>
+                        <ul aria-expanded="false" class="collapse  first-level">
+                            {% if is_granted('onboardings') %}
+                                <li class="sidebar-item">
+                                    <a href="{{ path('onboardings') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Terminy szkoleń</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if is_granted('training_general')%}
+                            <li class="sidebar-item">
+                                <a href="{{ path('trainings') }}" class="sidebar-link">
+                                    <i class="mdi mdi-adjust"></i>
+                                    <span class="hide-menu">Tworzenie szkoleń</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endif %}
+                {% if is_granted('emails') %}
+                    <li class="sidebar-item">
+                        <a href="{{ path('emails') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="hide-menu">Moduł powiadomie</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if is_granted('coaching') %}
+                    <li class="sidebar-item">
+                        <a href="{{ path('coaching_search') }}" class="sidebar-link waves-effect waves-dark" aria-expanded="false">
+                            <i class="fas fa-check"></i>
+                            <span class="hide-menu">Zaliczanie obecnoś</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if app.user.currentrole.name in ['Manager', 'P&O BP'] or is_granted("evaluation_survey") or is_granted("number_of_participants") %}
+                    <li class="sidebar-item">
+                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)"
+                           aria-expanded="false">
+                            <i class="fas fa-chart-pie"></i>
+                            <span class="hide-menu">Raporty</span>
+                        </a>
+                        <ul aria-expanded="false" class="collapse  first-level">
+                            {% if app.user.currentrole.name in ['Manager', 'P&O BP'] %}
+                                <li class="sidebar-item">
+                                    <a href="{{ path('report_export_data') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Export danych osób</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if is_granted("number_of_participants") %}
+                                <li class="sidebar-item">
+                                    <a href="{{ path('report_number_of_participants') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Liczba uczestników</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if is_granted("evaluation_survey") %}
+                                <li class="sidebar-item">
+                                    <a href="{{ path('report_evaluation_survey_export') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Raport z ankiet ewaluacyjnych</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ path('report_evaluation_survey_chart') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Wyniki ankiet ewaluacyjnych</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endif %}
+                {% if is_granted('divisions') or is_granted('places') %}
+                    <li class="sidebar-item">
+                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)"
+                           aria-expanded="false">
+                            <i class="fas fa-calendar-check"></i>
+                            <span class="hide-menu">Słowniki</span>
+                        </a>
+                        <ul aria-expanded="false" class="collapse  first-level">
+                            {% if is_granted('divisions') %}
+                                <li class="sidebar-item">
+                                    <a href="{{ path('divisions') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Dywizje</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if is_granted('places')%}
+                                <li class="sidebar-item">
+                                    <a href="{{ path('places') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Miejsca szkoleń</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endif %}
+                {% if is_granted('roles') or is_granted('permissions') %}
+                    <li class="sidebar-item">
+                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)"
+                           aria-expanded="false">
+                            <i class="fas fa-cogs"></i>
+                            <span class="hide-menu">Ustawienia</span>
+                        </a>
+                        <ul aria-expanded="false" class="collapse  first-level">
+                            {% if is_granted('roles') %}
+                                <li class="sidebar-item">
+                                    <a href="{{ path('roles') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Role</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if is_granted('permissions') %}
+                                <li class="sidebar-item">
+                                    <a href="{{ path('permissions') }}" class="sidebar-link">
+                                        <i class="mdi mdi-adjust"></i>
+                                        <span class="hide-menu">Uprawnienia</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</aside>

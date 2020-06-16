@@ -1,0 +1,189 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Konta użytkowników{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-md-5 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Konta użytkowników</h3>
+            </div>
+            <div class="col-md-7 col-12 align-self-center d-none d-md-block">
+                <div class="d-flex justify-content-end">
+                    {% if is_granted('migration') %}
+                        <a href="{{ path('migration_find') }}" class="btn waves-effect waves-light btn-info ">Migracja m/y dywizjami</a>
+                    {% endif %}
+                    {% if is_granted('user_add') %}
+                        <a href="{{ path('user_add') }}" class="btn waves-effect waves-light btn-info ml-1">Dodaj użytkownika</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="zero_config" class="table table-striped table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Nazwisko i imię</th>
+                                        <th>Dywizja</th>
+                                        <th>Obszar</th>
+                                        <th>Przełożony</th>
+                                        <th>P&O BP</th>
+                                        <th>Forma zatrud.</th>
+                                        <th>Data onboardingu</th>
+                                        <th>Status onboard.</th>
+                                        <th>Status szk. dodatk.</th>
+                                        <th>Status konta</th>
+                                        <th>Akcje</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for user in users %}
+                                        <tr>
+                                            <td>{{ user.surname~' '~user.name }}</td>
+                                            <td>{{ user.division }}</td>
+                                            <td>{{ user.department }}</td>
+                                            <td>{{ user.managerSurname~' '~user.managerName }}</td>
+                                            <td>{{ user.partnerSurname~' '~user.partnerName }}</td>
+                                            <td>{{ user.formOfEmployment }}</td>
+                                            <td>{% if user.onboardingDate %}{{ user.onboardingDate|date('Y-m-d') }}{% else %}{{ user.onboardingDate }}{% endif %}</td>
+                                            <td>
+                                                {% if user.statusNotAdditional is not null %}
+                                                    {% if user.statusNotAdditional == 100 %}
+                                                        <h5 class="text-success">
+                                                            <span style="display: none">100</span>
+                                                            <i class="ti-check-box"></i>
+                                                        </h5>
+                                                    {% else %}
+                                                        {{ user.statusNotAdditional }}%
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if user.statusAdditional is not null %}
+                                                    {% if user.statusAdditional == 100 %}
+                                                        <h5 class="text-success">
+                                                            <span style="display: none">100</span>
+                                                            <i class="ti-check-box"></i>
+                                                        </h5>
+                                                    {% else %}
+                                                        {{ user.statusAdditional }}%
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="#" class="btn btn-block {% if user.block or not user.active %}btn-danger{% else %}btn-success{% endif %}">
+                                                    {% if user.block %}
+                                                        {{ user.blockString }}
+                                                    {% else %}
+                                                        {{ user.activeString }}
+                                                    {% endif %}
+                                                </a>
+                                            </td>
+                                            <td class="text-right">
+                                                <button type="button" class="btn" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="ti-more-alt"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="{{ path('user_show', {user:user.id}) }}" data-toggle="tooltip" data-placement="top" >Profil</a>
+                                                    <a class="dropdown-item" href="{{ path('user_edit', {user:user.id}) }}" data-toggle="tooltip" data-placement="top" >Edycja profilu</a>
+                                                    <a class="dropdown-item" href="{{ path('user_onboarding_training', {user:user.id}) }}" data-toggle="tooltip" data-placement="top" >Lista szkoleń</a>
+                                                    <a class="dropdown-item" href="{{ path('user_history_exams', {user:user.id}) }}" data-toggle="tooltip" data-placement="top" >Wyniki zaliczeń</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/custom-datatable.js') }}"></script>
+    <script>
+        let $indexInputTable = [0,1,2,3,4,5,6,7,8];
+        let $indexSelectStatusTable = [9];
+        $(document).ready(function () {
+            $('#zero_config thead tr').clone(true).appendTo('#zero_config thead');
+            let $datatables = $('#zero_config').DataTable({
+                orderCellsTop: true,
+                language: {
+                    emptyTable: "Brak wyników",
+                    infoEmpty: "Brak wyników",
+                    zeroRecords: "Brak wyników",
+                    lengthMenu: "_MENU_",
+                    search: "  ",
+                    sSearchPlaceholder: "Wyszukaj...",
+                    info: "Wyświetlanych jest _START_ do _END_ z _TOTAL_ wyników", sInfoFiltered:"(wyfiltrowane z _MAX_ wszystkich wpisów)",
+                    paginate: {
+                        "next": " >",
+                        "previous": "< "
+                    }
+                },
+                "columnDefs": [
+                    {
+                        "targets": 6,
+                        "type": "date-eu",
+                    },
+                    {
+                        "targets": 7,
+                        "type": "num-fmt",
+                    },
+                    {
+                        "targets": 9,
+                        "orderable": false
+                    }
+                    ]
+            });
+
+            $('#zero_config thead tr:eq(1) th').each(function (i) {
+                if($.inArray(i, $indexInputTable) !== -1) {
+                    $(this).html('<input class="columnInput" type="search" placeholder="Wyszukaj..."/>');
+
+                    $('input', this).on('keyup change', function () {
+                        console.log('1');
+                        $('#zero_config').DataTable()
+                            .column(i)
+                            .search(this.value)
+                            .draw();
+                    });
+                }
+                else if($.inArray(i, $indexSelectStatusTable) !== -1) {
+                    select = $('<select class="columnSelect"><option value=" "></option></select>')
+                        .appendTo($(this).empty())
+                        .on('change', function () {
+                            $datatables.column(i)
+                                .search($(this).val())
+                                .draw();
+                        });
+                    select.append('<option value="Aktywny">Aktywny</option>');
+                    select.append('<option value="Nieakt.">Nieakt.</option>');
+                    select.append('<option value="Zablok.">Zablok.</option>');
+
+                }
+                else {
+                    $(this).html('');
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,25 @@
+<div id="modal_add_widget" class="modal fade" tabindex="-1"   aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel"> Dodaj kolejny widget</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            {{ form_start(form) }}
+            <div class="modal-body">
+                <div class="form-group">
+                    {{ form_label(form.widget) }}
+                    {{ form_errors(form.widget) }}
+                    {{ form_widget(form.widget) }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-info" type="submit" >Zapisz</button>
+{#                <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">Zamknij</button>#}
+            </div>
+            {{ form_end(form) }}
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

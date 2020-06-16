@@ -1,0 +1,46 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}{{ app.request.get('exam').training.name }}{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">{{ app.request.get('exam').training.name }}</h3>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                                <div class="form-body">
+                                    {% for key,question in form.children %}
+                                        <div class="row">
+                                            <div class="col-12 ">
+                                                {{ form_row(question) }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-actions">
+                                    <div class="text-right">
+                                        <a class="btn btn-dark" href="{{ path('onboarding_training_show', {onboardingTraining: app.request.get('onboardingTraining').id}) }}">Anuluj</a>
+                                        <button type="submit" class="btn btn-info">Wyślij</button>
+                                    </div>
+                                </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

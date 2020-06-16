@@ -1,0 +1,191 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Plan szkoleń{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Plan szkoleń</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            {% if onboarding is not null %}
+                {% for day in onboarding.days %}
+                    <div class="row">
+                        <div class="col-12 col-lg-8 offset-lg-2">
+                            <div class="card">
+                                <div class="card-header bg-info text-white text-center">
+                                    {{ day.day~' | Część wspólna | '~day.place.name~', '~day.hall }}
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nazwa szkolenia</th>
+                                                    <th>Godzina</th>
+                                                    <th>Trenerzy</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% set day = loop.index %}
+                                            {% set emptyTable = true %}
+                                            {% for onboardingTraining in onboarding.onboardingTrainings %}
+                                                {% if onboardingTraining.day == day and onboardingTraining.training.isGeneral and app.user in onboardingTraining.users %}
+                                                    {% set emptyTable = false %}
+                                                    <tr>
+                                                        <td>
+                                                            <a href="{{ path('onboarding_training_show', {onboardingTraining: onboardingTraining.id}) }}">
+                                                                {{ onboardingTraining.training.name }}
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            {{ onboardingTraining.time|date('H:i')~' - '~onboardingTraining.time|date_modify('+'~onboardingTraining.training.time~' min')|date('H:i') }}
+                                                        </td>
+                                                        <td>
+                                                            {% for coach in onboardingTraining.coaches %}
+                                                                {{ coach.name~' '~coach.surname }}
+                                                                {%- if not loop.last -%}, {%- endif -%}
+                                                            {% endfor %}
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if emptyTable %}
+                                                <tr>
+                                                    <td colspan="3" class="text-center">W tym dniu nie masz przypisanych żadnych szkoleń</td>
+                                                </tr>
+                                            {% endif %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% for onboardingDivision in onboarding.onboardingDivisions %}
+                    {% if onboardingDivision.division == app.user.department.division %}
+                        {% for day in onboardingDivision.days %}
+                            <div class="row">
+                                <div class="col-12 col-lg-8 offset-lg-2">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white text-center">
+                                            {{ day.day~' | '~onboardingDivision.division.name~' | '~day.place.name~', '~day.hall }}
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Nazwa szkolenia</th>
+                                                            <th>Godzina</th>
+                                                            <th>Trenerzy</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% set day = (1 + date(day.day).diff(date(onboarding.days[0].day)).days) %}
+                                                    {% set emptyTable = true %}
+                                                    {% for onboardingTraining in onboarding.onboardingTrainings %}
+                                                        {% if onboardingTraining.day == day and
+                                                            onboardingTraining.training.isDivision and
+                                                            not onboardingTraining.training.isAdditional and
+                                                            onboardingTraining.division == onboardingDivision.division and
+                                                            app.user in onboardingTraining.users
+                                                        %}
+                                                            {% set emptyTable = false %}
+                                                            <tr>
+                                                                <td>
+                                                                    <a href="{{ path('onboarding_training_show', {onboardingTraining: onboardingTraining.id}) }}">
+                                                                        {{ onboardingTraining.training.name }}
+                                                                    </a>
+                                                                </td>
+                                                                <td>
+                                                                    {{ onboardingTraining.time|date('H:i')~' - '~onboardingTraining.time|date_modify('+'~onboardingTraining.training.time~' min')|date('H:i') }}
+                                                                </td>
+                                                                <td>
+                                                                    {% for coach in onboardingTraining.coaches %}
+                                                                        {{ coach.name~' '~coach.surname }}
+                                                                        {%- if not loop.last -%}, {%- endif -%}
+                                                                    {% endfor %}
+                                                                </td>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% if emptyTable %}
+                                                        <tr>
+                                                            <td colspan="3" class="text-center">W tym dniu nie masz przypisanych żadnych szkoleń</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                {% set additionalTrainings = false %}
+                {% for onboardingTraining in onboarding.onboardingTrainings %}
+                    {% if onboardingTraining.training.isAdditional and onboardingTraining.training.isDivision and (app.user.department.division in onboardingTraining.training.divisions) and app.user in onboardingTraining.users %}
+                        {% set additionalTrainings = true %}
+                    {% endif %}
+                {% endfor %}
+                {% if additionalTrainings %}
+                    <div class="row">
+                        <div class="col-12 col-lg-8 offset-lg-2">
+                            <div class="card">
+                                <div class="card-header bg-info text-white text-center">
+                                    Szkolenia dodatkowe
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nazwa szkolenia</th>
+                                                    <th>Termin zaliczenia</th>
+                                                    <th>Trenerzy</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for onboardingTraining in onboarding.onboardingTrainings %}
+                                                {% if onboardingTraining.training.isAdditional and onboardingTraining.training.isDivision and (app.user.department.division in onboardingTraining.training.divisions) and app.user in onboardingTraining.users %}
+                                                    <tr>
+                                                        <td>
+                                                            <a href="{{ path('onboarding_training_show', {onboardingTraining: onboardingTraining.id}) }}">
+                                                                {{ onboardingTraining.training.name }}
+                                                            </a>
+                                                        </td>
+                                                        <td>{{ onboardingTraining.day }} dni</td>
+                                                        <td>
+                                                            {% for coach in onboardingTraining.coaches %}
+                                                                {{ coach.name~' '~coach.surname }}
+                                                                {%- if not loop.last -%}, {%- endif -%}
+                                                            {% endfor %}
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}

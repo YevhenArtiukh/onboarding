@@ -1,0 +1,64 @@
+.m-t-30{
+    margin-top: 30px;
+}
+.columnInput {
+    width: 100%;
+}
+.text-important p{
+    text-align:center !important
+}
+.pie_progress {
+    width: 120px;
+    margin: 10px 20px;
+}
+@media all and (max-width: 768px) {
+    .pie_progress {
+        width: 80%;
+        max-width: 200px;
+    }
+}
+
+.exam-write, .exam-result {
+    display: none;
+}
+
+@media all and (min-width: 768px) {
+    .questions-list, .question {
+        min-height: 350px;
+    }
+}
+[type=radio]:not(:checked)[class*=material-inputs] { left:0 }
+
+/*------ training list images ------*/
+
+.img-wrapper {
+    position: relative;
+    padding: 0 0 64% 0;
+}
+.card__img-wrapper {
+    padding: 0 0 70% 0;
+}
+.img-wrapper img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+@media screen and (max-width: 991px){
+    .img-wrapper {
+        padding: 0 0 40% 0;
+    }
+    .img-wrapper_card {
+        padding: 0 0 60% 0;
+    }
+}
+@media screen and (max-width: 576px){
+    .img-wrapper {
+        padding: 0 0 50% 0;
+    }
+}
+
+/*------  end ------*/

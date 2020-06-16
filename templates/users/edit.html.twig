@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edycja użytkownika{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-md-5 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Edycja użytkownika</h3>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="offset-3 col-6">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        {{ form_row(form.name) }}
+                                    </div>
+                                    <div class="col-6">
+                                        {{ form_row(form.surname) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        {{ form_row(form.email) }}
+                                    </div>
+                                    <div class="col-6">
+                                        {{ form_row(form.identifier) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        {{ form_row(form.date) }}
+                                    </div>
+                                    <div class="col-6">
+                                        {{ form_row(form.formOfEmployment) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        {{ form_row(form.department) }}
+                                    </div>
+                                    <div class="col-6">
+                                        {{ form_row(form.position) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        {{ form_row(form.typeOfWorker) }}
+                                    </div>
+                                    <div class="col-6">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form_row(form.roles) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <button type="submit" class="btn btn-info">Zapisz</button>
+                                    <a class="btn btn-dark" href="{{ path('users') }}">Anuluj</a>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/moment/moment.js') }}"></script>
+    <script src="{{ asset('assets/libs/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker-custom.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+
+    <script>
+        $(".select2").select2({
+            dropdownAutoWidth : true,
+            width: '100%'
+        });
+
+        $('#edit_date').bootstrapMaterialDatePicker({
+            format: 'DD.MM.YYYY',
+            time: false,
+            date: true
+        });
+    </script>
+{% endblock %}

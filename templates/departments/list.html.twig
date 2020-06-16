@@ -1,0 +1,97 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Struktura{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-md-5 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Struktura</h3>
+            </div>
+            <div class="col-md-7 col-12 align-self-center d-none d-md-block">
+                <div class="d-flex justify-content-end">
+                    <a href="#" class="btn waves-effect waves-light btn-info ml-1" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        Wybór dywizji <i class="ti-angle-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        {% for division in divisions %}
+                            <a class="dropdown-item {% if app.request.get('division') == division %}active{% endif %}"
+                               href="{{ path('departments', {division:division.id}) }}">{{ division.name }}</a>
+                        {% endfor %}
+                    </div>
+                    <a href="{{ path('business_partners') }}" class="btn waves-effect waves-light btn-info ml-1">Podział P&O BP</a>
+                    {% if is_granted('department_add') %}
+                        <a href="{{ path('department_add', {division:app.user.department.division.id}) }}" class="btn waves-effect waves-light btn-info ml-1">Nowy obszar</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <div id="treeview-searchable"></div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label for="input-search" class="sr-only">Search Tree:</label>
+                                        <input type="text" class="form-control" id="input-search" placeholder="Wyszukaj...">
+                                    </div>
+                                    <h5>Wyniki</h5>
+                                    <div id="search-output"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/extra-libs/treeview/dist/bootstrap-treeview.min.js') }}"></script>
+    <script>
+        var $searchableTree = $('#treeview-searchable').treeview({
+            levels: 100,
+            selectedBackColor: "#03a9f3",
+            onhoverColor: "rgba(0, 0, 0, 0.05)",
+            expandIcon: 'ti-plus',
+            collapseIcon: 'ti-minus',
+            nodeIcon: 'fa fa-folder',
+            data: JSON.parse('{{ tree|raw }}'),
+            onNodeSelected: function(event, node) {
+                console.log(node.href);
+                document.location = node.href;
+            }
+        });
+
+        var search = function(e) {
+            var pattern = $('#input-search').val();
+            var options = {
+                ignoreCase: true,
+                exactMatch: false,
+                revealResults: true
+            };
+            var results = $searchableTree.treeview('search', [ pattern, options ]);
+
+            var output = '<p>' + results.length + ' matches found</p>';
+            $.each(results, function (index, result) {
+                output += '<p>- ' + result.text + '</p>';
+            });
+            $('#search-output').html(output);
+        };
+
+        $('#input-search').on('keyup', search);
+    </script>
+{% endblock %}

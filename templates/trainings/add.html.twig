@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tworzenie szkolenia{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/libs/dropzone/dist/min/dropzone.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Tworzenie szkolenia</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="offset-sm-2 offset-xl-3 col-12 col-sm-8 col-xl-6">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12 col-lg-6">
+                                        <div class="form-group">
+                                            <div class="img-wrapper">
+                                                <img id="photo" src="{{ asset('assets/images/backphoto.png') }}" alt="photo" onclick="clickInputFile()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-6">
+                                        <h3 class="title">Dane ogólne</h3>
+                                        <div class="form-group">
+
+                                            {{ form_row(form.name) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form_row(form.time) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form_row(form.typeOfTraining) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form_row(form.kindOfTraining) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group" id="division">
+                                            {% if form.division is defined %}
+                                                {{ form_label(form.division) }}
+                                                {{ form_widget(form.division) }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group m-t-30" id="additionalTraining">
+                                            {% if form.additionalTraining is defined %}
+                                                {{ form_widget(form.additionalTraining) }}
+                                                {{ form_label(form.additionalTraining) }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form_row(form.description) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form_row(form.trainerInfo) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form_row(form.workerInfo) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <a class="btn btn-dark" href="{{ path('trainings') }}">Anuluj</a>
+                                    <button type="submit" class="btn btn-info">Zapisz</button>
+                                </div>
+                            </div>
+
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+    <script>
+        function clickInputFile() {
+            document.getElementById("add_image").click();
+        }
+
+        function handleFileSelect(evt) {
+            var files = evt.target.files;
+            for (var i = 0, f; f = files[i]; i++) {
+                if (!f.type.match('image.*')) {
+                    continue;
+                }
+                var reader = new FileReader();
+                reader.onload = (function(theFile) {
+                    return function(e) {
+                        document.getElementById('photo').src = e.target.result;
+                    };
+                })(f);
+                reader.readAsDataURL(f);
+            }
+        }
+
+        document.getElementById('add_image').addEventListener('change', handleFileSelect, false);
+
+        let $kindOfTrainings = $("#add_kindOfTraining");
+        let $token = $("#post_token");
+        $kindOfTrainings.change(function () {
+            $('.spinner-wrapp').css({'display':'flex'});
+            var $form = $(this).closest('form');
+            var data = {};
+            data[$token.attr('name')] = $token.val();
+            data[$kindOfTrainings.attr('name')] = $kindOfTrainings.val();
+            $.post($form.attr('action'),data).then(function (response) {
+                $("#division").replaceWith(
+                    $(response).find("#division")
+                );
+                $("#additionalTraining").replaceWith(
+                    $(response).find("#additionalTraining")
+                );
+
+                $(".select2").select2({
+                    dropdownAutoWidth : true
+                });
+                $('.spinner-wrapp').css({'display':'none'});
+            })
+        });
+    </script>
+{% endblock %}

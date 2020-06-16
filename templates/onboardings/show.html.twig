@@ -1,0 +1,460 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Plan szkoleń{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-lg-2 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Plan szkoleń</h3>
+            </div>
+            <div class="col-lg-10 col-12 align-self-center d-none d-md-block">
+                <div class="d-flex justify-content-end">
+                    {% if (app.request.get('onboarding').isGeneral and is_granted('onboarding_training_add_general')) or
+                        (app.request.get('onboarding').isDivision and is_granted('onboarding_training_add_division')) %}
+                        {{ form_start(formCopy) }}
+                        {{ form_end(formCopy) }}
+                    {% endif %}
+                    <button type="button" class="btn waves-effect waves-light btn-info ml-1"
+                            data-toggle="modal" data-target="#email">E-mail</button>
+                    {% if is_granted('onboarding_training_add_general') %}
+                        <a href="{{ path('onboarding_training_general_add', {onboarding: app.request.get('onboarding').id}) }}" class="btn waves-effect waves-light btn-info ml-1">Dodaj szk. wspólne</a>
+                    {% endif %}
+                    {% if app.request.get('onboarding').isDivision and is_granted('onboarding_training_add_division') %}
+                        <a href="{{ path('onboarding_training_division_add', {onboarding: app.request.get('onboarding').id}) }}" class="btn waves-effect waves-light btn-info ml-1">Dodaj szk. dywizyjne</a>
+                        <a href="{{ path('onboarding_training_add_additional', {onboarding: app.request.get('onboarding').id}) }}" class="btn waves-effect waves-light btn-info ml-1">Dodaj szk. dodatkowe</a>
+                    {% endif %}
+                    {% if (app.request.get('onboarding').isGeneral and is_granted('onboarding_training_add_general')) or
+                        (app.request.get('onboarding').isDivision and is_granted('onboarding_training_add_division') and not app.request.get('onboarding').checkConfirmation(app.user.department.division)) %}
+                        {{ form(formChangeStatus) }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            {% for day in app.request.get('onboarding').days %}
+                <div class="row">
+                    <div class="col-12 col-lg-8 offset-lg-2">
+                        <div class="card">
+                            <div class="card-header bg-info text-white text-center">
+                                {{ day.day~' | Część wspólna | '~day.place.name~', '~day.hall }}
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive overflow-inherit">
+                                    <table class="table">
+                                        <tbody>
+                                        {% set day = loop.index %}
+                                        {% for onboardingTraining in app.request.get('onboarding').onboardingTrainings %}
+                                            {% if onboardingTraining.day == day and onboardingTraining.training.isGeneral %}
+                                                <tr>
+                                                    <td class="w-75">
+                                                        {{ onboardingTraining.training.name }}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {{ onboardingTraining.time|date('H:i')~' - '~onboardingTraining.time|date_modify('+'~onboardingTraining.training.time~' min')|date('H:i') }}
+                                                    </td>
+                                                    {% if is_granted('onboarding_add') %}
+                                                        <td class="text-right">
+                                                            <button type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                <i class="ti-more-alt"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu" style="">
+                                                                <a class="dropdown-item" href="{{ path('onboarding_training_edit', {onboarding: app.request.get('onboarding').id, onboardingTraining: onboardingTraining.id}) }}">Edytuj</a>
+                                                                <a class="dropdown-item delete_training" id="{{ onboardingTraining.id }}" data-value="{{ csrf_token('delete' ~ onboardingTraining.id) }}" href="#">Usuń</a>
+                                                            </div>
+                                                        </td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% for onboardingDivision in app.request.get('onboarding').onboardingDivisions %}
+                {% if onboardingDivision.division == app.user.department.division %}
+                    {% for day in onboardingDivision.days %}
+                        <div class="row">
+                            <div class="col-12 col-lg-8 offset-lg-2">
+                                <div class="card">
+                                    <div class="card-header bg-info text-white text-center">
+                                        {{ day.day~' | '~onboardingDivision.division.name~' | '~day.place.name~', '~day.hall }}
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive overflow-inherit">
+                                            <table class="table">
+                                                <tbody>
+                                                {% set day = (1 + date(day.day).diff(date(app.request.get('onboarding').days[0].day)).days) %}
+                                                {% for onboardingTraining in app.request.get('onboarding').onboardingTrainings %}
+                                                    {% if onboardingTraining.day == day and
+                                                        onboardingTraining.training.isDivision and
+                                                        not onboardingTraining.training.isAdditional and
+                                                        onboardingTraining.division == onboardingDivision.division
+                                                    %}
+                                                        <tr>
+                                                            <td class="w-75">
+                                                                {{ onboardingTraining.training.name }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ onboardingTraining.time|date('H:i')~' - '~onboardingTraining.time|date_modify('+'~onboardingTraining.training.time~' min')|date('H:i') }}
+                                                            </td>
+                                                            {% if app.request.get('onboarding').isDivision and is_granted('onboarding_training_add_division') %}
+                                                                <td class="text-right">
+                                                                    <button type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                        <i class="ti-more-alt"></i>
+                                                                    </button>
+                                                                    <div class="dropdown-menu" style="">
+                                                                        <a class="dropdown-item" href="{{ path('onboarding_training_edit', {onboarding: app.request.get('onboarding').id, onboardingTraining: onboardingTraining.id}) }}">Edytuj</a>
+                                                                        <a class="dropdown-item delete_training" id="{{ onboardingTraining.id }}" data-value="{{ csrf_token('delete' ~ onboardingTraining.id) }}" href="#">Usuń</a>
+                                                                    </div>
+                                                                </td>
+                                                            {% endif %}
+                                                        </tr>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+
+            {% set additionalTrainings = false %}
+            {% for onboardingTraining in app.request.get('onboarding').onboardingTrainings %}
+                {% if onboardingTraining.training.isAdditional and onboardingTraining.training.isDivision and app.user.department.division == onboardingTraining.division %}
+                    {% set additionalTrainings = true %}
+                {% endif %}
+            {% endfor %}
+            {% if additionalTrainings %}
+                <div class="row">
+                    <div class="col-12 col-lg-8 offset-lg-2">
+                        <div class="card">
+                            <div class="card-header bg-info text-white text-center">
+                                Szkolenia dodatkowe
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive overflow-inherit">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>Nazwa szkolenia</th>
+                                            <th>Termin zaliczenia</th>
+                                            {% if app.request.get('onboarding').isDivision and is_granted('onboarding_training_add_division') %}
+                                                <th></th>
+                                            {% endif %}
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for onboardingTraining in app.request.get('onboarding').onboardingTrainings %}
+                                            {% if onboardingTraining.training.isAdditional and onboardingTraining.training.isDivision and app.user.department.division == onboardingTraining.division %}
+                                                <tr>
+                                                    <td>{{ onboardingTraining.training.name }}</td>
+                                                    <td>{{ onboardingTraining.day }} dni</td>
+                                                    {% if app.request.get('onboarding').isDivision and is_granted('onboarding_training_add_division') %}
+                                                        <td class="text-right">
+                                                            <button type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                <i class="ti-more-alt"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu" style="">
+                                                                <a class="dropdown-item" href="{{ path('onboarding_training_edit_additional', {onboarding: app.request.get('onboarding').id, onboardingTraining: onboardingTraining.id}) }}">Edytuj</a>
+                                                                <a class="dropdown-item delete_training" id="{{ onboardingTraining.id }}" data-value="{{ csrf_token('delete' ~ onboardingTraining.id) }}" href="#">Usuń</a>
+                                                            </div>
+                                                        </td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if app.request.get('onboarding').isDivision %}
+                <div class="row">
+                    <div class="col-12 col-lg-8 offset-lg-2">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        <h4 class="card-title">
+                                            Przypisane do {{ app.user.department.division.name }}
+                                        </h4>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        {% if is_granted('onboarding_add_users') %}
+                                            <button type="button" class="btn waves-effect waves-light btn-info ml-1"
+                                                    data-toggle="modal" data-target="#add-user">Dodaj nowego</button>
+                                            <button type="button" class="btn waves-effect waves-light btn-info ml-1"
+                                                    data-toggle="modal" data-target="#add-users">Dodaj z listy</button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table id="zero_config" class="table table-striped table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th>LP</th>
+                                            <th>Login</th>
+                                            <th>Imię i nazwisko</th>
+                                            <th>Obszar</th>
+                                            <th>Przełożony</th>
+                                            {% if is_granted('onboarding_training_add_division') %}
+                                                <th>Akcje</th>
+                                            {% endif %}
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for user in app.request.get('onboarding').users %}
+                                            {% if user.department.division == app.user.department.division %}
+                                                <tr>
+                                                    <td>{{ loop.index }}</td>
+                                                    <td>{{ user.login }}</td>
+                                                    <td>{{ user.name~' '~user.surname }}</td>
+                                                    <td>{{ user.department.name }}</td>
+                                                    <td>
+                                                        {% if user.department.manager %}
+                                                            {{ user.department.manager.name~' '~user.department.manager.surname }}
+                                                        {% endif %}
+                                                    </td>
+                                                    {% if is_granted('onboarding_training_add_division') %}
+                                                        <td class="text-right">
+                                                            <button type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                <i class="ti-more-alt"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu" style="">
+                                                                <a class="dropdown-item" href="{{ path('onboarding_user_training_edit', {onboarding:app.request.get('onboarding').id, user:user.id}) }}">Szkolenia</a>
+                                                                <a class="dropdown-item" href="{{ path('onboarding_user_edit', {onboarding:app.request.get('onboarding').id, user:user.id}) }}">Zmień</a>
+                                                                <a class="dropdown-item delete_user" id="{{ user.id }}" data-value="{{ csrf_token('delete' ~ user.id) }}" href="#">Usuń</a>
+                                                            </div>
+                                                        </td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        {{ parent() }}
+    </div>
+
+    <div id="email" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Wyślij e-mail</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <form action="{{ path('onboarding_email', {onboarding: app.request.get('onboarding').id}) }}" method="POST">
+                    <div class="modal-body">
+                        <p>E-mail zostanie wysłany do trenerów, nowo zatrudnionych pracowników oraz ich managerów</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-dark" data-dismiss="modal" aria-hidden="true">Anuluj</button>
+                        <button type="submit" class="btn btn-info">Wyślij</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if app.request.get('onboarding').isDivision %}
+        <div id="add-users" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Dodaj istniejącego pracownika</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    </div>
+                    {{ form_start(formUsers) }}
+                    <div class="modal-body">
+                        <div class="form-body">
+                            <div class="row">
+                                <div class="col-12 col-lg-10 offset-lg-1">
+                                    {{ form_row(formUsers.users) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-dark" data-dismiss="modal" aria-hidden="true">Anuluj</button>
+                        <button type="submit" class="btn btn-info">Dodaj</button>
+                    </div>
+                    {{ form_end(formUsers) }}
+                </div>
+            </div>
+        </div>
+
+        <div id="add-user" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Dodaj nowego pracownika</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    </div>
+                    {{ form_start(formUser) }}
+                    <div class="modal-body">
+                        <div class="form-body">
+                            <div class="row">
+                                <div class="col-12 col-lg-5 offset-lg-1">
+                                    {{ form_row(formUser.name) }}
+                                </div>
+                                <div class="col-12 col-lg-5">
+                                    {{ form_row(formUser.surname) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-5 offset-lg-1">
+                                    {{ form_row(formUser.email) }}
+                                </div>
+                                <div class="col-12 col-lg-5">
+                                    {{ form_row(formUser.identifier) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-5 offset-lg-1">
+                                    {{ form_row(formUser.department) }}
+                                </div>
+                                <div class="col-12 col-lg-5">
+                                    {{ form_row(formUser.position) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-5 offset-lg-1">
+                                    {{ form_row(formUser.division) }}
+                                </div>
+                                <div class="col-12 col-lg-5">
+                                    {{ form_row(formUser.formOfEmployment) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-5 offset-lg-1">
+                                    {{ form_row(formUser.typeOfWorker) }}
+                                </div>
+                                <div class="col-12 col-lg-5">
+                                    {{ form_row(formUser.roles) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-dark" data-dismiss="modal" aria-hidden="true">Anuluj</button>
+                        <button type="submit" class="btn btn-info">Dodaj</button>
+                    </div>
+                    {{ form_end(formUser) }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% if app.request.get('onboarding').isDivision %}
+        <script src="{{ asset('assets/libs/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ asset('assets/js/pages/datatable/custom-datatable.js') }}"></script>
+        <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+        <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+        <script>
+            var $indexInputTable = [0,1,2,3,4];
+            $(document).ready(function () {
+                $('#zero_config thead tr').clone(true).appendTo('#zero_config thead');
+                $datatables = $('#zero_config').DataTable({
+                    orderCellsTop: true,
+                    language: {
+                        emptyTable: "Brak wyników",
+                        infoEmpty: "Brak wyników",
+                        zeroRecords: "Brak wyników",
+                        lengthMenu: "_MENU_",
+                        search: "  ",
+                        sSearchPlaceholder: "Wyszukaj...",
+                        info: "Wyświetlanych jest _START_ do _END_ z _TOTAL_ wyników", sInfoFiltered:"(wyfiltrowane z _MAX_ wszystkich wpisów)",
+                        paginate: {
+                            "next": " >",
+                            "previous": "< "
+                        }
+                    },
+                });
+
+                $('#zero_config thead tr:eq(1) th').each(function (i) {
+                    if($.inArray(i, $indexInputTable) !== -1) {
+                        $(this).html('<input class="columnInput" type="search" placeholder="Wyszukaj..."/>');
+
+                        $('input', this).on('keyup change', function () {
+                            $('#zero_config').DataTable()
+                                .column(i)
+                                .search(this.value)
+                                .draw();
+                        });
+                    } else {
+                        $(this).html('');
+                    }
+                });
+            });
+            $(".select2").select2({
+                dropdownAutoWidth : true,
+                width: '100%'
+            });
+        </script>
+    {% endif %}
+    <script>
+        $('.delete_training, .delete_user').on('click', function () {
+            let $id = this.id;
+            let $token = $(this).data("value");
+            let $var, $title;
+
+            if ($(this).hasClass('delete_training')) {
+                $title = 'Usuwanie szkolenia';
+                $var = 'training';
+            } else {
+                $title = 'Usuwanie pracownika z onboardingu';
+                $var = 'user';
+            }
+
+            Swal.fire({
+                title: $title,
+                text: "Czy na pewno chcesz usunąć?",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Anuluj',
+                confirmButtonText: 'Usuń'
+            }).then((result) => {
+                if (result.value) {
+                    fetch(location.origin + "/onboarding/" + {{ app.request.get('onboarding').id }} + "/" + $var + "/" + $id + "/delete", {
+                        method: 'delete',
+                        body: '_token=' + $token,
+                        headers: {'Content-type': 'application/x-www-form-urlencoded'}
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+            });
+            return false;
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nowy onboarding{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Nowy onboarding</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <h4>Część wspólna:</h4>
+                                <div class="row">
+                                    <div class="col-12 col-sm-6">
+                                        {{ form_row(form.dateStart) }}
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        {{ form_row(form.dateEnd) }}
+                                    </div>
+                                </div>
+                                <h4>Część dywizyjna:</h4>
+                                <div id="days_block">
+                                    <div id="add_days"
+                                         data-prototype="{{ form_widget(form.days.vars.prototype)|e('html_attr') }}">
+                                        {% if form.vars.value.days is defined %}
+                                            {% for key, day in form.days %}
+                                                <div class="form-group">
+                                                    <div id="add_days_{{ key }}" class="row">
+                                                        {{ form_row(day.division) }}
+                                                        {{ form_row(day.dateStart) }}
+                                                        {{ form_row(day.dateEnd) }}
+                                                        {{ form_row(day.delete) }}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 text-right">
+                                        <button type="button" class="add-another-collection-widget btn btn-info" data-list-selector="#add_answers" onclick="addDay();">Dodaj kolejną</button>
+                                    </div>
+                                </div>
+                                <hr>
+                            </div>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <a class="btn btn-dark" href="{{ path('annual_schedules') }}">Anuluj</a>
+                                    <button type="submit" class="btn btn-info">Zapisz</button>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/moment/min/moment-with-locales.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker-custom.js') }}"></script>
+    <script>
+        $('#add_dateStart, #add_dateEnd').bootstrapMaterialDatePicker({
+            weekStart: 0,
+            time: false,
+            format: 'DD.MM.YYYY'
+        });
+
+        let list = $('#add_days');
+        let counter = list.data('widget-counter') || list.children().length;
+        function addDay() {
+            let newWidget = list.attr('data-prototype');
+
+            newWidget = newWidget.replace(/__name__/g, counter);
+            counter++;
+            list.data('widget-counter', counter);
+            var newElem = $('<div class="form-group"></div>').html(newWidget);
+            newElem.appendTo(list);
+
+            $('#add_days_'+(counter-1)+'_dateStart, #add_days_'+(counter-1)+'_dateEnd').bootstrapMaterialDatePicker({
+                weekStart: 0,
+                time: false,
+                format: 'DD.MM.YYYY'
+            });
+
+            if (list.children().length === 3)
+                $('.add-another-collection-widget').attr('disabled', 'disabled');
+
+            blockDivision();
+        }
+        {% if form.vars.value.days is not defined %}
+        addDay();
+        {% endif %}
+
+        function deleteDay(id) {
+            $('#'+id).parent().parent().parent().remove();
+            if (list.children().length < 3)
+                $('.add-another-collection-widget').attr('disabled', false);
+
+            blockDivision();
+        }
+
+        function blockDivision() {
+            let selectedDivision = [];
+            $('select[id^="add_days_"]').each(function (index, el) {
+                if ($(this).children("option:selected").val())
+                    selectedDivision.push(parseInt($(this).children("option:selected").val()));
+            });
+
+            $('select[id^="add_days_"]').each(function (index, el) {
+                $(this).find('option').each(function (key, value) {
+                    $(this).attr('disabled', !!($(this).val() && !$(this).is(':selected') && ($.inArray(parseInt($(this).val()), selectedDivision) >= 0)));
+                });
+            });
+        }
+    </script>
+{% endblock %}

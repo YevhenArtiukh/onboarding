@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dodaj szkolenie{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Dodaj szkolenie |
+                    {% if app.request.get('_route') == 'onboarding_training_general_add' %}
+                        Część wspólna
+                    {% else %}
+                        {{ app.user.department.division.name }}
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12 col-lg-6">
+                                        {{ form_row(form.training) }}
+                                    </div>
+                                    <div class="col-12 col-lg-3">
+                                        {{ form_row(form.day) }}
+                                    </div>
+                                    <div class="col-12 col-lg-3">
+                                        {{ form_row(form.time) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 col-lg-6">
+                                        <div class="form-group" id="coaches">
+                                            {% if form.coaches is defined %}
+                                                {{ form_label(form.coaches) }}
+                                                {{ form_widget(form.coaches) }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-6">
+                                        <div class="form-group" id="type">
+                                            {% if form.type is defined %}
+                                                {{ form_label(form.type) }}
+                                                {{ form_widget(form.type) }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <a class="btn btn-dark" href="{{ path('onboarding_show', {onboarding: app.request.get('onboarding').id}) }}">Anuluj</a>
+                                    <button type="submit" class="btn btn-info">Zapisz</button>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+    <script>
+        $(".select2").select2({
+            dropdownAutoWidth : true,
+            width: '100%'
+        });
+
+        let $training = $("#add_training");
+        $training.change(function () {
+            var $form = $(this).closest('form');
+            var data = {};
+            data[$training.attr('name')] = $training.val();
+            $.post($form.attr('action'),data).then(function (response) {
+                if ($("#add_coaches").length !== $(response).find("#add_coaches").length) {
+                    $("#coaches").replaceWith(
+                        $(response).find("#coaches")
+                    );
+
+                    $("#type").replaceWith(
+                        $(response).find("#type")
+                    );
+
+                    $(".select2").select2({
+                        dropdownAutoWidth : true
+                    });
+                }
+            })
+        });
+    </script>
+{% endblock %}

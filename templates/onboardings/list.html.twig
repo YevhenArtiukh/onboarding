@@ -1,0 +1,149 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Plan onboardingów{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-md-5 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Plan onboardingów</h3>
+            </div>
+            <div class="col-md-7 col-12 align-self-center d-none d-md-block">
+                {% if is_granted('onboarding_add') %}
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ path('onboarding_add') }}" class="btn waves-effect waves-light btn-info">Nowy onboarding</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="zero_config" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Rozpoczęcie</th>
+                                            <th>Część wspólna</th>
+                                            <th>Pharma</th>
+                                            <th>Onco</th>
+                                            <th>Sandoz</th>
+                                            <th>Liczba uczestników</th>
+                                            <th>Akcje</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for onboarding in onboardings %}
+                                        <tr>
+                                            <td>{{ onboarding.id }}</td>
+                                            <td>{{ onboarding.firstDay }}</td>
+                                            <td>{{ onboarding.firstDay~' - '~onboarding.lastDay }}</td>
+                                            <td>{{ onboarding.pharma }}</td>
+                                            <td>{{ onboarding.onco }}</td>
+                                            <td>{{ onboarding.sandoz }}</td>
+                                            <td>{{ onboarding.countUser }}</td>
+                                            <td>
+                                                <button type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="ti-more-alt"></i>
+                                                </button>
+                                                <div class="dropdown-menu" style="">
+                                                    {% if onboarding.status.isDivisions and onboarding.checkDivisionData(app.user.department.division) and is_granted('onboarding_training_add_division') %}
+                                                        <a class="dropdown-item" href="{{ path('onboarding_division_add', {onboarding: onboarding.id}) }}">Dodaj część dywizyjną</a>
+                                                    {% endif %}
+                                                    {% if onboarding.status.isGeneral or (onboarding.status.isDivisions and not onboarding.checkDivisionData(app.user.department.division)) or is_granted('onboarding_training_add_general') %}
+                                                        <a class="dropdown-item" href="{{ path('onboarding_show', {onboarding: onboarding.id}) }}">Szczegóły</a>
+                                                    {% endif %}
+                                                    {% if is_granted('onboarding_delete') %}
+                                                        <a class="dropdown-item delete_onboarding" id="{{ onboarding.id }}" data-value="{{ csrf_token('delete' ~ onboarding.id) }}" href="#">Usuń</a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/custom-datatable.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+                "extract-date-pre": function (value) {
+                    var date = value.split('.');
+                    return Date.parse(date[1] + '/' + date[0] + '/' + date[2])
+                },
+                "extract-date-asc": function (a, b) {
+                    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+                },
+                "extract-date-desc": function (a, b) {
+                    return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+                }
+            });
+            $('#zero_config').dataTable({
+                language: {
+                    emptyTable: "Brak wyników",
+                    infoEmpty: "Brak wyników",
+                    zeroRecords: "Brak wyników",
+                    lengthMenu: "_MENU_",
+                    search: "  ",
+                    sSearchPlaceholder: "Wyszukaj...",
+                    info: "Wyświetlanych jest _START_ do _END_ z _TOTAL_ wyników", sInfoFiltered:"(wyfiltrowane z _MAX_ wszystkich wpisów)",
+                    paginate: {
+                        "next": " >",
+                        "previous": "< "
+                    }
+                },
+                columnDefs: [{
+                    type: 'extract-date',
+                    targets: [1]
+                }],
+                order: [
+                    [1, "desc"]
+                ]
+            });
+        });
+        $('.delete_onboarding').on('click', function () {
+            $id = this.id;
+            $token = $(this).data("value");
+
+            Swal.fire({
+                title: "Usuwanie onboardingu",
+                text: "Czy na pewno chcesz usunąć?",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Anuluj',
+                confirmButtonText: 'Usuń'
+            }).then((result) => {
+                if (result.value) {
+                    fetch(location.origin + "/onboarding/" + $id + "/delete", {
+                        method: 'delete',
+                        body: '_token=' + $token,
+                        headers: {'Content-type': 'application/x-www-form-urlencoded'}
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+            });
+            return false;
+        });
+    </script>
+{% endblock %}

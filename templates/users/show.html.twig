@@ -1,0 +1,309 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil użytkownika{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-md-5 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Profil użytkownika</h3>
+            </div>
+            <div class="col-md-7 col-12 align-self-center d-none d-md-block">
+                    <div class="d-flex justify-content-end">
+                        <button  data-value="{{ user.id }}" class="btn waves-effect waves-light btn-{% if user.block %}success{% else %}danger{% endif %}  ml-1 user_block">{% if user.block %}Odblokowanie{% else %}Blokowanie{% endif %}</button>
+                        <button data-value="{{ user.id }}" class="btn waves-effect waves-light btn-info ml-1 user_anon">Anonimizacja</button>
+                        <button data-toggle="modal" data-target="#changePasswordModal" class="btn waves-effect waves-light btn-info ml-1">Zmiana hasła</button>
+                    </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-4 col-xlg-3 col-md-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <center class="mt-4">
+                                {% if user.photo %}
+                                    <img
+                                            class="rounded-circle" width="150"
+                                            src="{{ asset('uploaded/user/'~user.photo) }}"
+                                            alt="photo" >
+                                {% else %}
+                                    <img src="{{ asset('assets/images/backphoto.png') }}"
+                                         class="rounded-circle" width="150"
+                                         alt="photo" >
+                                {% endif %}
+                                <h4 class="card-title mt-2">{{ user.name~' '~user.surname }}</h4>
+                                <h6 class="card-subtitle">{{ user.position }}</h6>
+                            </center>
+                        </div>
+                        <div>
+                            <hr>
+                        </div>
+                        <div class="card-body">
+
+                            <small class="text-muted pt-4 db">Imię</small>
+                            <h6>{{ user.name }}</h6>
+                            <small class="text-muted pt-4 db">Nazwisko</small>
+                            <h6>{{ user.surname }}</h6>
+                            <small class="text-muted pt-4 db">Login</small>
+                            <h6>{{ user.login }}</h6>
+                            <small class="text-muted">Email</small>
+                            <h6>{{ user.email }}</h6>
+                            <small class="text-muted">Identyfikator 5-2-1</small>
+                            <h6>{{ user.identifier }}</h6>
+                            <br/>
+                        </div>
+                    </div>
+                </div>
+                <!-- Column -->
+                <!-- Column -->
+                <div class="col-lg-8 col-xlg-9 col-md-7">
+                    <div class="card">
+                        <!-- Tabs -->
+                        <form class="form-horizontal">
+                            <div class="form-body">
+                                <div class="card-body">
+                                    <h4 class="card-title">Dane ogólne</h4>
+                                </div>
+                                <hr class="mt-0 mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Data
+                                                    zatrudnienia:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.dateOfEmployment|date("d.m.Y") }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Data
+                                                    onboardingu:</label>
+                                                <div class="col-md-7">
+                                                        <p class="form-control-static"> {{ user.onboardingDate }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <!--/row-->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Obszar:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.department.name }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Stanowisko:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.position }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <!--/row-->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Dywizja:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.department.division.name }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Forma
+                                                    zatrudnienia:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.formOfEmployment }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Pracownik:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.typeOfWorker }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Rola:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {% for role in user.roles %} {{ role }}{% if not loop.last %}, {% endif %} {% endfor %} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--/span-->
+                                    </div>
+                                    <!--/row-->
+
+                                    <h4 class="card-title mt-2">Dane przełożonego</h4>
+                                </div>
+                                <hr class="mt-0 mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Imię
+                                                    przełożonego:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.departmentManagerName }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Imię P&O BP:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.hRName }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Nazwisko
+                                                    przełożonego:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.departmentManagerSurname }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-5">Nazwisko P&O
+                                                    BP:</label>
+                                                <div class="col-md-7">
+                                                    <p class="form-control-static"> {{ user.hRSurname }} </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group row">
+                                            <label class="control-label text-right col-md-5">Email
+                                                przełożonego:</label>
+                                            <div class="col-md-7">
+                                                <p class="form-control-static">{{ user.departmentManagerEmail }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group row">
+                                            <label class="control-label text-right col-md-5">Email P&O
+                                                BP:</label>
+                                            <div class="col-md-7">
+                                                <p class="form-control-static"> {{ user.hREmail }} </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    <hr class="mt-0 mb-3">
+
+                                    <div class="form-actions">
+                                        <div class="text-right">
+                                            <a class="btn btn-info" href="{{ path('user_edit', {'user':user.id}) }}">Edytuj</a>
+                                        </div>
+                                    </div>
+                            </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Column -->
+    </div>
+    <!-- Row -->
+    <!-- ============================================================== -->
+    <!-- End PAge Content -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- Right sidebar -->
+    <!-- ============================================================== -->
+    <!-- .right-sidebar -->
+    <!-- ============================================================== -->
+    <!-- End Right sidebar -->
+    <!-- ============================================================== -->
+    </div>
+    <!-- ============================================================== -->
+    <!-- End Container fluid  -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- footer -->
+    <!-- ============================================================== -->
+    <footer class="footer">
+        © 2020 Material Pro Admin by wrappixel.com
+    </footer>
+    <!-- ============================================================== -->
+    <!-- End footer -->
+    <!-- ============================================================== -->
+    </div>
+    {{ include('users/modals/changePasswordModal.html.twig') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $('.user_block, .user_anon').on('click', function () {
+            $id = $(this).data("value");
+            if ($(this).hasClass('user_block')) {
+                $title = "{% if user.block %}Odblokowanie{% else %}Blokowanie{% endif %} użytkownika";
+                $text = "Czy na pewno chcesz {% if user.block %}odblokować{% else %}zablokować{% endif %} tego użytkownika?";
+                $var = 'block';
+                $cancelButtonText = 'Nie'
+                $confirmButtonText = 'Tak'
+            } else {
+                $title = 'Anonimizuj pracownika';
+                $text = "Anonimizacja oznacza usunięcie danych osobowych pracownika z systemu. Czy chcesz kontynuować dla tego pracownika? Proces jest niedowracalny";
+                $var = 'anon';
+                $cancelButtonText = 'Nie anonimizuj'
+                $confirmButtonText = 'Tak, anonimizuj'
+            }
+
+            Swal.fire({
+                title: $title,
+                text: $text,
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                cancelButtonText: $cancelButtonText,
+                confirmButtonText: $confirmButtonText
+            }).then((result) => {
+                if (result.value) {
+                    fetch(location.origin + "/user/" + $id + "/"+$var, {
+                        method: 'post',
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+            });
+        });
+        generatePassword();
+        function generatePassword() {
+            pwdChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz*&^%$#@!";
+            pwdLen = 32;
+            randPassword = Array(pwdLen).fill(pwdChars).map(function(x) { return x[Math.floor(Math.random() * x.length)] }).join('');
+            $('#change_password_password').val(randPassword);
+            return randPassword;
+        }
+    </script>
+{% endblock %}

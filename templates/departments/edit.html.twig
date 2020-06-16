@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Zmiana obszaru{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Zmiana obszaru</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12 col-lg-10 offset-lg-1">
+                                        {{ form_row(form.name) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 col-lg-10 offset-lg-1">
+                                        {{ form_row(form.parent) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 col-lg-10 offset-lg-1">
+                                        {{ form_row(form.manager) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 col-lg-10 offset-lg-1">
+                                        {{ form_row(form.businessPartner) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <button type="submit" class="btn btn-info">Zapisz</button>
+                                    <a class="btn btn-dark" href="{{ path('departments', {division:app.request.get('division').id}) }}">Anuluj</a>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+    <script>
+        $(".select2").select2({
+            dropdownAutoWidth : true,
+            width: '100%'
+        });
+    </script>
+{% endblock %}

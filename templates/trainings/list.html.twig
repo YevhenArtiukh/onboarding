@@ -1,0 +1,157 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Lista szkoleń{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-md-5 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Lista szkoleń {% if app.request.get('_route') == 'trainings' %} wspólnych {% else %} dywizyjnych{% endif %}</h3>
+            </div>
+
+            <div class="col-md-7 col-12 align-self-center d-none d-md-block">
+                <div class="d-flex justify-content-end align-items-center">
+                    <a href="#" class="btn waves-effect waves-light btn-info ml-1" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                        Szkolenia <i class="ti-angle-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item"
+                           href="{{ path('trainings') }}">Wspólne</a>
+                        {% if is_granted('training_division')%}
+                        <a class="dropdown-item"
+                            href="{{ path('trainings_division') }}">Moja dywizja</a>
+                        {% endif %}
+                    </div>
+
+                    <a href="{{ path('training_add') }}" class="btn waves-effect waves-light btn-info ml-1">Dodaj nowe szkolenie</a>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        {% for training in trainings %}
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                <div class="card">
+                                    <div class="img-wrapper img-wrapper_card">
+                                        {% if training.image %}
+                                            <img class="card-img-top img-fluid" src="{{ asset('uploaded/training/'~training.image) }}" alt="Card image cap">
+                                        {% else %}
+                                            <img class="card-img-top img-fluid" src="{{ asset('assets/images/backphoto.png')}}" alt="Card image cap">
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-body">
+                                        {#<div class="d-flex no-block align-items-center mb-3">#}
+                                            {#<span><i class="ti-calendar"></i> 20 May 2018</span>#}
+                                            {#<div class="ml-auto">#}
+                                                {#<a href="javascript:void(0)" class="link"><i class="ti-comments"></i> 3 Comments</a>#}
+                                            {#</div>#}
+                                        {#</div>#}
+                                        <h3 class="font-normal">{{ training.name }}</h3>
+                                            <p class="mb-0 mt-2">Czas trwania: {{ training.time }} min</p>
+                                        <a class="btn btn-success btn-rounded waves-effect waves-light mt-3" href="{{ path('training_edit', {training:training.id}) }}">Edytuj</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {#<!-- Column -->#}
+                        {#<div class="col-lg-3">#}
+                            {#<div class="card">#}
+                                {#<img class="card-img-top img-fluid" src="../assets/images/big/img4.jpg" alt="Card image cap">#}
+                                {#<div class="card-body">#}
+                                    {#<div class="d-flex no-block align-items-center mb-3">#}
+                                        {#<span><i class="ti-calendar"></i> 20 May 2018</span>#}
+                                        {#<div class="ml-auto">#}
+                                            {#<a href="javascript:void(0)" class="link"><i class="ti-comments"></i> 3 Comments</a>#}
+                                        {#</div>#}
+                                    {#</div>#}
+                                    {#<h3 class="font-normal">Featured Hydroflora Pots Garden &amp; Outdoors</h3>#}
+                                    {#<p class="mb-0 mt-2">Titudin venenatis ipsum ac feugiat. Vestibulum ullamcorper quam.</p>#}
+                                    {#<button class="btn btn-success btn-rounded waves-effect waves-light mt-3">Read more</button>#}
+                                {#</div>#}
+                            {#</div>#}
+                        {#</div>#}
+                        {#<!-- Column -->#}
+                        {#<!-- Column -->#}
+                        {#<div class="col-lg-4">#}
+                            {#<div class="card">#}
+                                {#<img class="card-img-top img-fluid" src="../assets/images/big/img5.jpg" alt="Card image cap">#}
+                                {#<div class="card-body">#}
+                                    {#<div class="d-flex no-block align-items-center mb-3">#}
+                                        {#<span><i class="ti-calendar"></i> 19 May 2018</span>#}
+                                        {#<div class="ml-auto">#}
+                                            {#<a href="javascript:void(0)" class="link"><i class="ti-comments"></i> 5 Comments</a>#}
+                                        {#</div>#}
+                                    {#</div>#}
+                                    {#<h3 class="font-normal">Featured Hydroflora Pots Garden &amp; Outdoors</h3>#}
+                                    {#<p class="mb-0 mt-2">Titudin venenatis ipsum ac feugiat. Vestibulum ullamcorper quam.</p>#}
+                                    {#<button class="btn btn-success btn-rounded waves-effect waves-light mt-3">Read more</button>#}
+                                {#</div>#}
+                            {#</div>#}
+                        {#</div>#}
+                        {#<!-- Column -->#}
+                        {#<!-- Column -->#}
+                        {#<div class="col-lg-4">#}
+                            {#<div class="card">#}
+                                {#<img class="card-img-top img-fluid" src="../assets/images/big/img6.jpg" alt="Card image cap">#}
+                                {#<div class="card-body">#}
+                                    {#<div class="d-flex no-block align-items-center mb-3">#}
+                                        {#<span><i class="ti-calendar"></i> 29 May 2018</span>#}
+                                        {#<div class="ml-auto">#}
+                                            {#<a href="javascript:void(0)" class="link"><i class="ti-comments"></i> 6 Comments</a>#}
+                                        {#</div>#}
+                                    {#</div>#}
+                                    {#<h3 class="font-normal">Featured Hydroflora Pots Garden &amp; Outdoors</h3>#}
+                                    {#<p class="mb-0 mt-2">Titudin venenatis ipsum ac feugiat. Vestibulum ullamcorper quam.</p>#}
+                                    {#<button class="btn btn-success btn-rounded waves-effect waves-light mt-3">Read more</button>#}
+                                {#</div>#}
+                            {#</div>#}
+                        {#</div>#}
+                        {#<!-- Column -->#}
+                    </div>
+                    {#<div class="card">#}
+                        {#<div class="card-body">#}
+                            {#<div class="table-responsive">#}
+                                {#<table id="zero_config" class="table table-striped table-bordered">#}
+                                    {#<thead>#}
+                                    {#<tr>#}
+                                        {#<th>id</th>#}
+                                        {#<th>Nazwa roli</th>#}
+                                        {#<th></th>#}
+                                    {#</tr>#}
+                                    {#</thead>#}
+                                    {#<tbody>#}
+                                    {#{% for role in roles %}#}
+                                        {#<tr>#}
+                                            {#<td>{{ role.id }}</td>#}
+                                            {#<td>{{ role.name }}</td>#}
+                                            {#<td>#}
+                                                {#<a href="{{ path('role_edit', {role:role.id}) }}" data-toggle="tooltip" data-placement="top" title="Zmień">#}
+                                                    {#<i class="ti-pencil-alt"></i>#}
+                                                {#</a>#}
+                                            {#</td>#}
+                                        {#</tr>#}
+                                    {#{% endfor %}#}
+                                {#</table>#}
+                            {#</div>#}
+                        {#</div>#}
+                    {#</div>#}
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/custom-datatable.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/datatable-basic.init.js') }}"></script>
+{% endblock %}

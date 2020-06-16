@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nowy onboarding{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Nowy onboarding</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-lg-8 offset-lg-2">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div id="days_block">
+                                    <div id="add_days"
+                                         data-prototype="{{ form_widget(form.days.vars.prototype)|e('html_attr') }}">
+                                        {% if form.vars.value.days is defined %}
+                                            {% for key, day in form.days %}
+                                                <div class="form-group">
+                                                    <div id="add_days_{{ key }}" class="row">
+                                                        <div class="form-group col-3">
+                                                            {{ form_label(day.day, (key+1)~' dzień') }}
+                                                            {% if key != 0 %}
+                                                                {{ form_widget(day.day) }}
+                                                            {% else %}
+                                                                {{ form_widget(day.day, {'attr':{'readonly':false}}) }}
+                                                            {% endif %}
+                                                        </div>
+                                                        {{ form_row(day.place) }}
+                                                        {{ form_row(day.hall) }}
+                                                        {% if key != 0 %}
+                                                            {{ form_row(day.delete) }}
+                                                        {% else %}
+                                                            {{ form_row(day.delete, {'attr':{'class':'d-none'}}) }}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 text-right">
+                                        <button type="button" class="add-another-collection-widget btn btn-info" data-list-selector="#add_answers" onclick="addDay();">+1 dzień</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <button type="submit" class="btn btn-info">Zapisz</button>
+                                    <a class="btn btn-dark" href="{{ path('onboardings') }}">Anuluj</a>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/moment/min/moment-with-locales.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker-custom.js') }}"></script>
+    <script>
+        function addDay() {
+            var list = $('#add_days');
+            var counter = list.data('widget-counter') || list.children().length;
+            var newWidget = list.attr('data-prototype');
+            if(counter === 0) {
+                newWidget = newWidget.replace('<div class="col-2 form-group d-flex align-items-center"><button type="button" id="add_days___name___delete" name="add[days][__name__][delete]" class="btn waves-effect waves-light btn-danger" onClick="deleteDay(this.id);">Usuń</button></div>', '');
+                newWidget = newWidget.replace('<input type="text" id="add_days___name___day" name="add[days][__name__][day]" required="required" class="form-control date" readonly="readonly" />', '<input type="text" id="add_days___name___day" name="add[days][__name__][day]" required="required" class="form-control date" />');
+            }
+
+            newWidget = newWidget.replace(/__name__/g, counter);
+            newWidget = newWidget.replace(/dzień/g, (list.children().length+1)+' dzień');
+            counter++;
+            list.data('widget-counter', counter);
+            var newElem = $('<div class="form-group"></div>').html(newWidget);
+            newElem.appendTo(list);
+            recalculateDate();
+        }
+        {% if form.vars.value.days is not defined %}
+            addDay();
+        {% endif %}
+
+        $('#add_days_0_day').bootstrapMaterialDatePicker({
+            weekStart: 0,
+            time: false,
+            format: 'DD.MM.YYYY'
+        }).on('change', function () {recalculateDate();});
+
+        function deleteDay(id) {
+            $('#'+id).parent().parent().parent().remove();
+            let list = $('#add_days').children();
+            list.each(function (index, el) {
+                $(el).find('.number').html((index + 1)+' dzień');
+            });
+            recalculateDate();
+        }
+
+        function recalculateDate() {
+            let date = $('#add_days_0_day').val();
+            if(date !== '') {
+                $('#add_days').children().each(function (index, el) {
+                    console.log(moment(date, "DD.MM.YYYY").add(index, 'days').format('DD.MM.YYYY'));
+                    $(el).find('.date').val(moment(date, "DD.MM.YYYY").add(index, 'days').format('DD.MM.YYYY'));
+                });
+            }
+        }
+    </script>
+{% endblock %}

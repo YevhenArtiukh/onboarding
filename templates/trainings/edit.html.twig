@@ -1,0 +1,314 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Zmiana szkolenia{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/libs/dropify/dist/css/dropify.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Zmiana szkolenia</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="offset-sm-2 offset-xl-3 col-12 col-sm-8 col-xl-6">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12 col-lg-6">
+                                        <div class="form-group">
+                                            <div class="img-wrapper">
+                                                {% if form.image.vars.data %}
+                                                    <img id="photo"
+                                                         src="{{ asset('uploaded/training/'~form.image.vars.data.filename) }}"
+                                                         alt="photo" onclick="clickInputFile()">
+                                                {% else %}
+                                                    <img id="photo" src="{{ asset('assets/images/backphoto.png') }}"
+                                                         alt="photo" onclick="clickInputFile()">
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-6">
+                                        <h3 class="title">Dane ogólne</h3>
+                                        <div class="form-group">
+                                            {{ form_row(form.name) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form_row(form.time) }}
+                                        </div>
+                                        <div class="form-group">
+                                            {{ form_row(form.typeOfTraining) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form_row(form.kindOfTraining) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group" id="division">
+                                            {% if form.division is defined %}
+                                                {{ form_label(form.division) }}
+                                                {{ form_widget(form.division) }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group m-t-30" id="additionalTraining">
+                                            {% if form.additionalTraining is defined %}
+                                                {{ form_widget(form.additionalTraining) }}
+                                                {{ form_label(form.additionalTraining) }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form_row(form.description) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form_row(form.trainerInfo) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form_row(form.workerInfo) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table id="training_attachment" class="table ">
+                                    <thead class="bg-info text-white">
+                                    <tr role="row">
+                                        <th colspan="3" rowspan="1">Materiały szkoleniowe</th>
+                                        <th class="text-right">
+                                            <button type="button" id="add_exam" data-toggle="modal"
+                                                    data-target="#addAttachModal"
+                                                    class="btn waves-effect waves-light btn-light">Dodaj
+                                            </button>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for tA in trainingAttachments %}
+                                        <tr>
+                                            <td colspan="3">{{ tA.defaultName }}</td>
+                                            <td class="text-right">
+                                                <button type="button" class="btn" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="ti-more-alt"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item"
+                                                       href="{{ asset('uploaded/trainingAttachment/'~tA.name) }}"
+                                                       download>Pobierz</a>
+                                                    <a class="dropdown-item delete_attachment" id="{{ tA.id }}"
+                                                       data-value="{{ csrf_token('delete' ~ tA.id) }}" href="#">Usuń</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table id="exam_table" class="table">
+                                    <thead class="bg-info text-white">
+                                    <tr role="row">
+                                        <th colspan="4" rowspan="1">Testy/Ankiety do szkolenia</th>
+                                        <th class="text-right">
+                                            <button type="button" id="add_exam" data-toggle="modal"
+                                                    data-target="#addExamModal"
+                                                    class="btn waves-effect waves-light btn-light">Dodaj
+                                            </button>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for exam in exams %}
+                                        <tr>
+                                            <td>{{ exam.name }}</td>
+                                            <td>Pytań: {{ exam.countQuestions }} </td>
+                                            <td>Zmodyfikowany: {{ exam.dateOfModification }}</td>
+                                            <td>
+                                                <a href="#"
+                                                   class="btn {% if exam.isActive is same as (true) %}btn-success{% else %} btn-danger{% endif %}"> {{ exam.isActiveString }}</a>
+                                            </td>
+                                            <td class="text-right">
+                                                <button type="button" class="btn" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="ti-more-alt"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item"
+                                                       href="{{ path('exam_show', {exam: exam.id}) }}">Pytania</a>
+                                                    <a class="dropdown-item"
+                                                       href="{{ path('exam_edit', {exam: exam.id}) }}">Edycja</a>
+                                                    <a class="dropdown-item delete_exam" id="{{ exam.id }}"
+                                                       data-value="{{ csrf_token('delete' ~ exam.id) }}" href="#">Usuń</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <a class="btn btn-dark" href="{{ path('trainings') }}">Anuluj</a>
+                                    <button type="submit" id="submitFormEdit" class="btn btn-info">Zapisz</button>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('trainings/modals/addAttachmentModal.html.twig') }}
+        {{ include('trainings/modals/addExamModal.html.twig') }}
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/dropify/dist/js/dropify.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+
+    <script>
+        $('.delete_attachment, .delete_exam').on('click', function () {
+            $id = this.id;
+            $token = $(this).data("value");
+
+            if ($(this).hasClass('delete_attachment')) {
+                $title = 'Usuwanie materiału szkolenia';
+                $var = 'attachment';
+            } else {
+                $title = 'Usuwanie testu/ankiety';
+                $var = 'exam';
+            }
+
+            Swal.fire({
+                title: $title,
+                text: "Czy na pewno chcesz usunąć?",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Anuluj',
+                confirmButtonText: 'Usuń'
+            }).then((result) => {
+                if (result.value) {
+                    fetch(location.origin + "/"+$var+"/" + $id + "/delete", {
+                        method: 'delete',
+                        body: '_token=' + $token,
+                        headers: {'Content-type': 'application/x-www-form-urlencoded'}
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+            });
+        });
+
+
+
+        $(document).ready(function () {
+            $(".select2").select2({
+                dropdownAutoWidth: true
+            });
+
+            var drEvent = $('.dropify').dropify({
+                    "showRemove": false,
+                    "messages": {
+                        default: 'Drag and drop a file here or click',
+                        replace: 'Drag and drop or click to replace',
+                        remove: 'Remove',
+                        error: 'Ooops, something wrong appended.'
+                    }
+                }
+            );
+            drEvent.on('dropify.errors', function (event, element) {
+                alert('Has Errors!');
+            });
+        });
+
+        function clickInputFile() {
+            document.getElementById("edit_image").click();
+        }
+
+        function clickAddAttachment() {
+            document.getElementById("add_file").click();
+        }
+
+        function handleFileSelect(evt) {
+            var files = evt.target.files;
+            for (var i = 0, f; f = files[i]; i++) {
+                if (!f.type.match('image.*')) {
+                    continue;
+                }
+                var reader = new FileReader();
+                reader.onload = (function (theFile) {
+                    return function (e) {
+                        document.getElementById('photo').src = e.target.result;
+                    };
+                })(f);
+                reader.readAsDataURL(f);
+            }
+        }
+
+        document.getElementById('edit_image').addEventListener('change', handleFileSelect, false);
+
+        let $kindOfTrainings = $("#edit_kindOfTraining");
+        let $token = $("#post_token");
+        $kindOfTrainings.change(function () {
+            $('.spinner-wrapp').css({'display': 'flex'});
+            var $form = $(this).closest('form');
+            var data = {};
+            data[$token.attr('name')] = $token.val();
+            data[$kindOfTrainings.attr('name')] = $kindOfTrainings.val();
+            $.post($form.attr('action'), data).then(function (response) {
+                $("#division").replaceWith(
+                    $(response).find("#division")
+                );
+                $("#additionalTraining").replaceWith(
+                    $(response).find("#additionalTraining")
+                );
+
+                $(".select2").select2({
+                    dropdownAutoWidth: true
+                });
+                $('.spinner-wrapp').css({'display': 'none'});
+            })
+        });
+
+        $('#add_type').on('change', function () {
+            if (this.value === 'Test')
+                $('#add_duration').removeAttr('readonly');
+            else
+                $('#add_duration').attr('readonly', true);
+        });
+    </script>
+{% endblock %}

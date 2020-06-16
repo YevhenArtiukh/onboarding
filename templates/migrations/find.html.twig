@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Migracja m/y dywizjami{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Migracja m/y dywizjami</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="offset-3 col-6">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <h3 class="title">Dane pracownika</h3>
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form_row(form.surname) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form_row(form.name) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form_row(form.division) }}
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <div class="text-right">
+                                        <a class="btn btn-dark" href="{{ path('users') }}">Anuluj</a>
+                                        <button type="submit" class="btn btn-info">Wyszukaj</button>
+                                    </div>
+                                </div>
+
+                                {{ form_end(form) }}
+                            </div>
+                            {% if usersData  %}
+                            <div class="table-responsive mt-3">
+                                <table id="training_attachment" class="table ">
+                                    <thead class="bg-info text-white">
+                                    <tr>
+                                        <th>Imię i nazwisko</th>
+                                        <th>Login</th>
+                                        <th>Dywizja</th>
+                                        <th>Obszar</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for uD in usersData %}
+                                        <tr>
+                                            <td><a href="{{ path('migration_show', {'user': uD.id}) }}">{{ uD.name }} {{ uD.surname }}</a></td>
+                                            <td>{{ uD.login }} </td>
+                                            <td>{{ uD.divisionName }} </td>
+                                            <td>{{ uD.departmentName }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                             {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+
+
+    </script>
+{% endblock %}

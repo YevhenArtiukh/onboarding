@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: 176px;
+            grid-column-gap: 15px;
+            grid-row-gap: 20px;
+            height: 372px;
+        }
+
+        .dashboard-cards-wrapp {
+            display: grid;
+            grid-template-columns: 60% 39%;
+            grid-column-gap: 15px;
+            margin-bottom: 30px;
+
+        }
+
+        .dashboard-cards .card-dashboard {
+            margin: 0;
+        }
+
+        .dashboard-cards-wrapp, .add-widget_square-chart {
+            height: 100%;
+        }
+
+        .dashboard-cards-wrapp .card-dashboard,
+        .dashboard-cards-wrapp .card-body,
+        .dashboard-cards-wrapp .card-block_add-widget,
+        .add-widget_wide-chart .card-block_add-widget {
+            height: 100%;
+            margin-bottom: 0;
+        }
+
+        .widget .card {
+            margin: 0;
+        }
+
+        .widget {
+            position: relative;
+            height: 100%;
+        }
+
+        .card-block_add-widget {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    {#    <link href="../assets/libs/chartist/dist/chartist.min.css" rel="stylesheet">#}
+    {#    <link href="../../dist/js/pages/chartist/chartist-init.css" rel="stylesheet">#}
+    {#    <link href="../assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.css" rel="stylesheet">#}
+    <link href="{{ asset('assets/extra-libs/css-chart/css-chart.css') }}" rel="stylesheet">
+    {#    <link href="{{ asset('assets/extra-libs/c3/c3.min.css') }}" rel="stylesheet">#}
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="container-fluid">
+            <div class="dashboard-cards-wrapp">
+                <div class="dashboard-cards">
+
+                    {% for i in 1..4 %}
+                        {% if i in UW.position %}
+                            <div id="widget_{{ i }}">
+                                <div class="widget">
+                                    <div class="card card-dashboard">
+                                        <div class="card-header">
+                                            <div class="card-actions">
+                                                <a href="{{ path('remove_widget', {userWidget: UW.widget[i].relUserWidgetID}) }}"
+                                                   class="btn-close" data-action="close"><i class="ti-close"></i></a>
+                                            </div>
+                                            <h4 class="card-title">{{ UW.widget[i].widgetID.title }}</h4>
+                                        </div>
+                                        <div class="card-body">
+
+                                            <div class="row ">
+                                                {% if UW.widget[i].widgetID.value is iterable %}
+                                                    <div class="col-9 pr-0">
+
+                                                    {% for date in UW.widget[i].widgetID.value %}
+                                                        {% if date.time %}
+                                                        <h4 class="font-weight-light">{{ date.date ~' '~ date.time|date('H:i')}}</h4>
+                                                        {% else %}
+                                                            <h4 class="font-weight-light">{{ date.date}}</h4>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    <!-- Column -->
+                                                    <div class="col-9 pr-0">
+                                                        <h1 class="font-weight-light">{{ UW.widget[i].widgetID.value }}</h1>
+                                                        <h6 class="text-muted">{{ UW.widget[i].widgetID.description }}</h6>
+                                                    </div>
+                                                    <!-- Column -->
+                                                {% endif %}
+                                                <div class="col-3 text-right align-self-center">
+                                                    <a href="{{ UW.widget[i].widgetID.href }}" data-label="100%"
+                                                       class="css-bar mb-0 css-bar-{{ UW.widget[i].widgetID.color }} css-bar-100"><i
+                                                                class="{{ UW.widget[i].widgetID.icon }}"></i></a>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div id="widget_{{ i }}">
+                                <div class="widget">
+                                    <div class="card card-dashboard card-dashboard_add-widget">
+                                        <div class="card-body card-block_add-widget">
+                                            <a class="btn default btn-outline image-popup-vertical-fit el-link text-danger border-danger add_widget_modal"
+                                               href="#" data-toggle="modal" data-target="#modal_add_widget"
+                                               data-value="{{ i }}"><i class="ti-plus"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% set position = 5 %}
+                {% if(position in UW.position) %}
+                    <div id="widget_5">
+                        <div class="widget">
+                            <div class="card card-dashboard">
+                                <div class="card-header">
+                                    <div class="card-actions">
+                                        <a href="{{ path('remove_widget', {userWidget: UW.widget[position].relUserWidgetID}) }}"
+                                           class="btn-close" data-action="close"><i class="ti-close"></i></a>
+                                    </div>
+                                    <h4 class="card-title">{{ UW.widget[position].widgetID.title }}</h4>
+                                </div>
+                                <div class="card-body collapse in">
+                                    <div class="card-block">
+                                        <canvas id="smallChart" style="display: block;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div id="widget_{{ position }}">
+                        <div class="widget">
+                            <div class="card card-dashboard">
+                                <div class="card-body card-block_add-widget ">
+                                    <a class="btn default btn-outline image-popup-vertical-fit el-link text-danger border-danger add_small_chart"
+                                       href="#" data-toggle="modal" data-target="#modal_add_small_chart"
+                                       data-value="{{ position }}"><i class="ti-plus"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    {{ include('dashboard/dashboardModals/add_widget_modal.html.twig') }}
+    {{ include('dashboard/dashboardModals/add_small_chart.html.twig') }}
+
+{% endblock %}
+    {% block javascripts %}
+        {{ parent() }}
+        <script src="{{ asset('assets/libs/chart.js/dist/Chart.min.js') }}"></script>
+        <script>
+            $(".add_widget_modal").click(function () {
+                $('#add_widget_position').val($(this).attr('data-value'));
+
+            });
+            $(".add_small_chart").click(function () {
+                $('#add_small_chart_position').val($(this).attr('data-value'))
+            });
+
+            {% set position = 5 %}
+            {% if  position in UW.position %}
+            $(window).on("load", function () {
+                var ctx2 = $("#smallChart");
+                var chartData = JSON.parse('{{ UW.widget[position].widgetID.chartData|json_encode|raw }}');
+                var chartOption = JSON.parse('{{ UW.widget[position].widgetID.chartOption|json_encode|raw }}');
+                var config = {
+                    type: '{{ UW.widget[position].widgetID.chartType }}',
+                    options: chartOption,
+                    data: chartData
+                };
+                simpleChart = new Chart(ctx2, config);
+
+            });
+            {% endif %}
+
+
+        </script>
+    {% endblock %}

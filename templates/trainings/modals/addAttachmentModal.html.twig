@@ -1,0 +1,27 @@
+<div class="modal fade" id="addAttachModal" tabindex="-1" role="dialog"
+     aria-labelledby="addAttachModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myLargeModalLabel">Dodaj materiały szkoleniowe</h4>
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">×
+                </button>
+            </div>
+            <div class="modal-body">
+                {{ form_start(formAttach) }}
+                <div class="form-body">
+                    {{ form_row(formAttach.file) }}
+                </div>
+                <div class="form-actions">
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-info">Zapisz</button>
+                        <a class="btn btn-dark" data-dismiss="modal" href="#">Anuluj</a>
+                    </div>
+                </div>
+                {{ form_end(formAttach) }}
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,161 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Lista pytań{% endblock %}
+
+{% block stylesheets %}
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-md-5 col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Lista pytań</h3>
+            </div>
+            <div class="col-md-7 col-12 align-self-center d-none d-md-block">
+                <div class="d-flex justify-content-end">
+                    <a href="{{ path('question_add', {exam:app.request.get('exam').id}) }}" class="btn waves-effect waves-light btn-info">Dodaj nowe pytanie</a>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="zero_config" class="table table-striped table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>id</th>
+                                        <th>Pytanie</th>
+                                        <th>Typ pytania</th>
+                                        <th>Akcje</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for question in questions %}
+                                        <tr id="{{ question.id }}">
+                                            <td>{{ question.id }}</td>
+                                            <td>{{ question.name }}</td>
+                                            <td>{{ question.type }}</td>
+                                            <td class="text-right">
+                                                <a href="#" title="Przesuń do góry" onclick="(function(e){e.preventDefault();})(event)">
+                                                    <i class="ti-angle-up move-up"></i>
+                                                </a>
+                                                <a href="#" title="Przesuń do dołu" onclick="(function(e){e.preventDefault();})(event)">
+                                                    <i class="ti-angle-down move-down"></i>
+                                                </a>
+                                                <button type="button" class="btn" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="ti-more-alt"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item"
+                                                       href="{{ path('question_edit', {exam:app.request.get('exam').id, question:question.id}) }}">Edycja</a>
+                                                    <a class="dropdown-item delete_question" id="{{ question.id }}"
+                                                       data-value="{{ csrf_token('delete' ~ question.id) }}" href="#">Usuń</a>
+                                                </div>
+                                            </td>
+
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/custom-datatable.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/datatable/datatable-basic.init.js') }}"></script>
+
+    <script>
+
+        $(document).ready( function() {
+
+            $('table').on('click', '.move-up', function () {
+                var thisRow = $(this).closest('tr');
+                var prevRow = thisRow.prev();
+                if (prevRow.length) {
+                    prevRow.before(thisRow);
+                    $idThis = $(thisRow).closest('tr').find('td:eq(0)').text();
+                    $idPrev = $(prevRow).closest('tr').find('td:eq(0)').text();
+                    $(prevRow).closest('tr').find('td:eq(0)').html($idThis);
+                    $(thisRow).closest('tr').find('td:eq(0)').html($idPrev);
+                    $.ajax({
+                        url: '{{ path('change_sort_question') }}',
+                        type: 'POST',
+                        data: {
+                            'current' : thisRow.prop('id'),
+                            'toChange' : prevRow.prop('id'),
+                        },
+                        success: function(arr) {
+                        },
+                        error: function (err) {
+                            alert('error!');
+                        },
+                    });
+                }
+            });
+
+            $('table').on('click', '.move-down', function () {
+                var thisRow = $(this).closest('tr');
+                var nextRow = thisRow.next();
+                if (nextRow.length) {
+                    nextRow.after(thisRow);
+                    $idThis = $(thisRow).closest('tr').find('td:eq(0)').text();
+                    $idNext = $(nextRow).closest('tr').find('td:eq(0)').text();
+                    $(nextRow).closest('tr').find('td:eq(0)').html($idThis);
+                    $(thisRow).closest('tr').find('td:eq(0)').html($idNext);
+                    $.ajax({
+                        url: '{{ path('change_sort_question') }}',
+                        type: 'POST',
+                        data: {
+                            'current' : thisRow.prop('id'),
+                            'toChange' : nextRow.prop('id'),
+                        },
+                        success: function(arr) {
+                        },
+                        error: function () {
+                            alert('error!')
+                        },
+                    });
+                }
+            });
+
+            $('.delete_question').on('click', function () {
+                $id = this.id;
+                $token = $(this).data("value");
+
+                Swal.fire({
+                    title: 'Usuwanie pytania',
+                    text: "Czy na pewno chcesz usunąć?",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    cancelButtonText: 'Anuluj',
+                    confirmButtonText: 'Usuń'
+                }).then((result) => {
+                    if (result.value) {
+                        fetch(location.origin + "/question/" + $id + "/delete", {
+                            method: 'delete',
+                            body: '_token=' + $token,
+                            headers: {'Content-type': 'application/x-www-form-urlencoded'}
+                        }).then((result) => {
+                            window.location.reload();
+                        })
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

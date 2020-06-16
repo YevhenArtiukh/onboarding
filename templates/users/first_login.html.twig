@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block topbar %}{% endblock %}
+
+{% block sidebar %}{% endblock %}
+
+{% block body %}
+    <div class="auth-wrapper d-flex no-block justify-content-center align-items-center" style="background:url({{ asset('assets/images/background/login-register.jpg') }}) no-repeat center center; background-size: cover;">
+        <div class="auth-box p-4 bg-white rounded">
+            <div id="loginform">
+                <div class="logo">
+                    <h3 class="box-title mb-3">Pierwsze logowanie</h3>
+                    <p>Dodaj zdjęcie profilowe (opcjonalne)</p>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        {{ form_start(form) }}
+                        <div>
+                            <img id="photo" src="{{ asset('assets/images/alert/alert3.png') }}" alt="photo" onclick="clickInputFile()" style="max-height: 100%; max-width: 100%">
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.password) }}
+                            {{ form_errors(form.password) }}
+                            {{ form_widget(form.password) }}
+                            <div class="has-danger">
+                                <div class="form-control-feedback" id="first-condition">min. 8 znaków</div>
+                            </div>
+                            <div class="has-danger">
+                                <div class="form-control-feedback" id="second-condition">min. 1 cyfra</div>
+                            </div>
+                            <div class="has-danger">
+                                <div class="form-control-feedback" id="third-condition">min. 1 mała litera</div>
+                            </div>
+                            <div class="has-danger">
+                                <div class="form-control-feedback" id="fourth-condition">min. 1 wielka litera</div>
+                            </div>
+                            <div class="has-danger">
+                                <div class="form-control-feedback" id="fifth-condition">min. 1 znak specjalny !@#+=._-</div>
+                            </div>
+                        </div>
+                        {% if form.role is defined %}
+                            {{ form_row(form.role) }}
+                        {% endif %}
+                        {{ form_row(form.photo) }}
+                        <div class="form-group text-center mt-4">
+                            <div class="col-xs-12">
+                                <button class="btn btn-info btn-lg btn-block text-uppercase waves-effect waves-light" type="submit">Dalej</button>
+                            </div>
+                        </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".preloader").fadeOut();
+
+        function clickInputFile() {
+            document.getElementById("first_login_photo").click();
+        }
+
+        function handleFileSelect(evt) {
+            var files = evt.target.files;
+            for (var i = 0, f; f = files[i]; i++) {
+                if (!f.type.match('image.*')) {
+                    continue;
+                }
+                var reader = new FileReader();
+                reader.onload = (function(theFile) {
+                    return function(e) {
+                        document.getElementById('photo').src = e.target.result;
+                    };
+                })(f);
+                reader.readAsDataURL(f);
+            }
+        }
+
+        document.getElementById('first_login_photo').addEventListener('change', handleFileSelect, false);
+        
+        function checkPassword() {
+            let password = document.getElementById("first_login_password");
+            let first_condition = document.getElementById("first-condition");
+            let second_condition = document.getElementById("second-condition");
+            let third_condition = document.getElementById("third-condition");
+            let fourth_condition = document.getElementById("fourth-condition");
+            let fifth_condition = document.getElementById("fifth-condition");
+            // first condition
+            if(password.value.length >= 8) {
+                first_condition.parentElement.classList.add('has-success');
+                first_condition.parentElement.classList.remove('has-danger');
+            } else {
+                first_condition.parentElement.classList.add('has-danger');
+                first_condition.parentElement.classList.remove('has-success');
+            }
+            // second condition
+            if(/\d/.test(password.value)) {
+                second_condition.parentElement.classList.add('has-success');
+                second_condition.parentElement.classList.remove('has-danger');
+            } else {
+                second_condition.parentElement.classList.add('has-danger');
+                second_condition.parentElement.classList.remove('has-success');
+            }
+            // third condition
+            if(/[a-z]/.test(password.value)) {
+                third_condition.parentElement.classList.add('has-success');
+                third_condition.parentElement.classList.remove('has-danger');
+            } else {
+                third_condition.parentElement.classList.add('has-danger');
+                third_condition.parentElement.classList.remove('has-success');
+            }
+            // fourth condition
+            if(/[A-Z]/.test(password.value)) {
+                fourth_condition.parentElement.classList.add('has-success');
+                fourth_condition.parentElement.classList.remove('has-danger');
+            } else {
+                fourth_condition.parentElement.classList.add('has-danger');
+                fourth_condition.parentElement.classList.remove('has-success');
+            }
+            // fourth condition
+            // if(/[!@#\$%\^\&*\)\(+=._-]/.test(password.value)) {
+            if(/[!@#+=._-]/.test(password.value)) {
+                fifth_condition.parentElement.classList.add('has-success');
+                fifth_condition.parentElement.classList.remove('has-danger');
+            } else {
+                fifth_condition.parentElement.classList.add('has-danger');
+                fifth_condition.parentElement.classList.remove('has-success');
+            }
+        }
+    </script>
+{% endblock %}

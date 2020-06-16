@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tworzenie maila{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Tworzenie maila</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form_row(form.name) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        {{ form_row(form.category) }}
+                                    </div>
+                                    <div class="col-4">
+                                        {{ form_row(form.days) }}
+                                    </div>
+                                    <div class="col-4">
+                                        {{ form_row(form.function) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form_row(form.sentTo) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form_row(form.message) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div id="variables_list"
+                                             data-prototype="{{ form_widget(form.variables.vars.prototype)|e('html_attr') }}"
+                                             data-widget-tags="{{ '<div class="form-group"></div>'|e }}">
+                                        </div>
+                                        <button type="button"
+                                                class="add-another-collection-widget btn btn-info"
+                                                data-list-selector="#variables_list">Dodaj nową zmienną</button>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <div class="text-right">
+                                    <button type="submit" class="btn btn-info">Zapisz</button>
+                                    <a class="btn btn-dark" href="{{ path('emails') }}">Anuluj</a>
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+    <script>
+        $(".select2").select2({
+            dropdownAutoWidth : true,
+            width: '100%'
+        });
+
+        $('.add-another-collection-widget').click(function (e) {
+            var list = $('#variables_list');
+            // Try to find the counter of the list or use the length of the list
+            var counter = list.data('widget-counter') || list.children().length;
+            // grab the prototype template
+            var newWidget = list.attr('data-prototype');
+            // replace the "__name__" used in the id and name of the prototype
+            // with a number that's unique to your emails
+            // end name attribute looks like name="contact[emails][2]"
+            newWidget = newWidget.replace(/__name__/g, counter);
+            // Increase the counter
+            counter++;
+            // And store it, the length cannot be used if deleting widgets is allowed
+            list.data('widget-counter', counter);
+            // create a new list element and add it to the list
+            var newElem = $(list.attr('data-widget-tags')).html(newWidget);
+            newElem.appendTo(list);
+        });
+    </script>
+{% endblock %}

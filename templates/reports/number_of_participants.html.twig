@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Raport Liczba uczestników{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        <div class="row page-titles">
+            <div class="col-12 align-self-center">
+                <h3 class="text-themecolor mb-0">Raport Liczba uczestników</h3>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            {{ form_start(formDateBetween) }}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-12 col-md-3">
+                                        {{ form_row(formDateBetween.dateStart) }}
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        {{ form_row(formDateBetween.dateEnd) }}
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        {{ form_row(formDateBetween.division) }}
+                                    </div>
+                                    <div class="col-12 col-md-3 text-right text-md-center">
+                                        <button type="button" class="btn btn-info" onclick="download()">Pobierz raport
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {{ form_end(formDateBetween) }}
+                            <h4 class="card-title">Liczba uczestników</h4>
+                            <div>
+                                <canvas id="bar-chart" height="350"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/chart.js/dist/Chart.min.js') }}"></script>
+    <script>
+        let $chart = null;
+        $('#date_between_dateStart, #date_between_dateEnd, #date_between_division').on('change', function () {
+            let $dateStart = $('#date_between_dateStart').val();
+            let $dateEnd = $('#date_between_dateEnd').val();
+            let $division = $('#date_between_division').val();
+
+            if ($dateStart && $dateEnd && $division) {
+                $.ajax({
+                    url: '{{ path('report_number_of_participants') }}',
+                    type: 'POST',
+                    data: {
+                        'dateStart': $dateStart,
+                        'dateEnd': $dateEnd,
+                        'division': $division
+                    },
+                    success: function (response) {
+                        if ($chart) $chart.destroy();
+
+                        createChart(response.labels, response.data);
+                    },
+                    error: function (err) {
+                        alert('error!');
+                    },
+                });
+            }
+        });
+
+        function createChart(labels, data) {
+            let $colors = [];
+            $.each(labels, function () {
+                $colors.push("#1e88e5");
+            });
+            $chart = new Chart(document.getElementById("bar-chart"), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "Liczba uczestników",
+                            backgroundColor: $colors,
+                            data: data
+                        }
+                    ]
+                },
+                options: {
+                    legend: {display: false},
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scaleLineColor: 'transparent',
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 2
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        function download() {
+            var a = document.createElement("a");
+            a.href = $chart.toBase64Image();
+            a.download = "Liczba uczestników.png";
+            a.click();
+        }
+    </script>
+{% endblock %}

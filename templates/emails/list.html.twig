@@ -1,0 +1,130 @@
+{%  extends 'base.html.twig' %}
+
+{% block title %}Lista maili{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/dist/css/select2.min.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="page-wrapper">
+        {% if is_granted('email_add') %}
+            <div class="row page-titles">
+                <div class="col-12 align-self-center d-none d-md-block">
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ path('email_add') }}" class="btn waves-effect waves-light btn-info">Dodaj nowy e-mail</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        <div class="invoice-application">
+            <div class="left-part bg-white fixed-left-part list-of-user">
+                <a class="ti-menu ti-close btn btn-success show-left-part d-block d-md-none" href="javascript:void(0)"></a>
+                <div class="p-3">
+                    <h4>Chat Sidebar</h4>
+                </div>
+                <div class="scrollable position-relative" style="height:100%;">
+                    <div class="p-3 border-bottom">
+                        <form>
+                            <div class="searchbar">
+                                <input class="form-control" type="text" placeholder="Wyszukaj...">
+                            </div>
+                        </form>
+                    </div>
+                    <ul class="mailbox list-style-none app-invoice">
+                        <li>
+                            <div class="message-center chat-scroll invoice-users">
+                                {% for key, form in forms %}
+                                    <a href="javascript:void(0)" class="invoice-user message-item align-items-center border-bottom px-3 py-2 listing-user" id="invoice-{{ key }}" data-invoice-id="{{ key }}">
+                                        <div class="mail-contnet w-75 d-inline-block v-middle pl-2">
+                                            <h6 class="message-title mb-0 mt-1 text-truncate invoice-customer">
+                                                {{ form.name.vars.data }}
+                                            </h6>
+                                            <span class="font-12 text-nowrap d-block text-muted text-truncate invoice-id">
+                                                <span class="font-weight-bold text-dark">Kategoria:</span> {{ form.category.vars.data }}
+                                            </span>
+                                        </div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="right-part invoice-box" style="display: block;">
+                <div class="p-4 invoice-inner-part">
+                    <div class="chat-not-selected">
+                    </div>
+                    <div class="invoiceing-box">
+                        <div class="card card-body">
+                            <div class="invoice-header d-flex align-items-center border-bottom pb-3">
+                                <h3 class="font-medium text-uppercase mb-0">E-mail</h3>
+                                <div class="ml-auto">
+                                    <h4 class="invoice-number"></h4>
+                                </div>
+                            </div>
+                            <div class="" id="custom-invoice">
+                                {% for key, form in forms %}
+                                    <div class="invoice-{{ key }}" id="printableArea">
+                                        {{ form_start(form) }}
+                                        <div class="form-body">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    {{ form_row(form.name) }}
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-4">
+                                                    {{ form_row(form.days) }}
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    {{ form_row(form.sentTo) }}
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-9">
+                                                    {{ form_row(form.message) }}
+                                                </div>
+                                                <div class="col-3">
+                                                    <h4 class="card-title">Zmienne</h4>
+                                                    {{ form_row(form.variables,{'attr':{'style':'display:none;'}}) }}
+                                                    {% for variable in form.variables.children %}
+                                                        <span class="badge badge-info" data-toggle="tooltip" data-placement="top" title="{{ variable.vars.value.description }}">{{ variable.vars.value.variable }}</span>
+                                                        <br>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-actions">
+                                            <div class="text-right">
+                                                <button type="submit" class="btn btn-info">Zapisz</button>
+                                            </div>
+                                        </div>
+                                        {{ form_end(form) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/samplepages/jquery.PrintArea.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/invoice/invoice.js') }}"></script>
+    <script>
+        $(".select2").select2({
+            dropdownAutoWidth : true,
+            width: '100%'
+        });
+    </script>
+{% endblock %}
