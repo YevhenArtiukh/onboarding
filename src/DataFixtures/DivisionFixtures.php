@@ -30,7 +30,8 @@ class DivisionFixtures extends Fixture implements OrderedFixtureInterface
 
         foreach ($divisions as $name) {
             $division = new Division(
-                $name
+                $name,
+                null
             );
             $manager->persist($division);
         }

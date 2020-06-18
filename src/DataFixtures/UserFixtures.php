@@ -43,7 +43,8 @@ class UserFixtures extends Fixture implements OrderedFixtureInterface
                 new ArrayCollection($roles),
                 $division->getName(),
                 password_hash($division->getName(), PASSWORD_BCRYPT),
-                null
+                null,
+                new ArrayCollection()
             );
             $manager->persist($user);
         }

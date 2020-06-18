@@ -30,6 +30,8 @@ class DepartmentFixtures extends Fixture implements OrderedFixtureInterface
             $department = new Department(
                 'test obszar w dywizji '.$division->getName(),
                 null,
+                null,
+                null,
                 $division
             );
             $manager->persist($department);
